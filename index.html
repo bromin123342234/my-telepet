@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic Eggs - Уход и Инвентарь</title>
+    <title>Мой Питомец</title>
     <style>
+        /* Стили остаются такими же, как в предыдущем коде */
         * {
             margin: 0;
             padding: 0;
@@ -12,11 +13,11 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            height: 100vh;
             padding: 20px;
+            color: white;
         }
         
         .container {
@@ -25,68 +26,27 @@
             text-align: center;
         }
         
-        .egg-container {
-            margin: 20px 0;
-            position: relative;
-        }
-        
-        .egg {
-            width: 150px;
-            height: 150px;
-            margin: 0 auto;
+        .pet {
+            width: 200px;
+            height: 200px;
+            background: white;
             border-radius: 50%;
-            background: linear-gradient(45deg, #f8f8f8, #e8e8e8);
+            margin: 20px auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 60px;
+            font-size: 80px;
             border: 5px solid gold;
-            box-shadow: 0 0 20px rgba(255,215,0,0.5);
-            transition: all 0.3s;
         }
         
-        .gold-egg { background: linear-gradient(45deg, #FFD700, #FFA500); }
-        .diamond-egg { background: linear-gradient(45deg, #00FFFF, #0080FF); }
-        
         .stats {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.2);
             padding: 15px;
             border-radius: 15px;
             margin: 15px 0;
-            backdrop-filter: blur(10px);
         }
         
-        .stat-item {
-            margin: 8px 0;
-            font-size: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 4px;
-            margin: 5px 0;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: #FFD700;
-            transition: width 0.5s;
-        }
-        
-        .care-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 10px 0;
-        }
-        
-        .main-actions {
+        .buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
@@ -94,639 +54,142 @@
         }
         
         button {
-            background: linear-gradient(45deg, #FFD700, #FFA500);
-            border: none;
             padding: 15px;
+            border: none;
             border-radius: 25px;
             font-size: 16px;
-            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
-            color: #333;
+            background: #FFD700;
+            transition: transform 0.2s;
         }
         
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
-        }
-        
-        .inventory-btn {
-            background: linear-gradient(45deg, #4ECDC4, #44A08D);
-            grid-column: span 2;
-        }
-        
-        .shop-btn {
-            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
-        }
-        
-        .care-btn {
-            background: linear-gradient(45deg, #FFB6C1, #FF69B4);
-            font-size: 14px;
-            padding: 12px;
-        }
-        
-        .timer {
-            background: rgba(255,255,255,0.1);
-            padding: 10px;
-            border-radius: 10px;
-            margin: 10px 0;
-            font-size: 14px;
-        }
-        
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        
-        .modal-content {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            padding: 20px;
-            border-radius: 20px;
-            max-width: 350px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .egg-shop {
-            display: grid;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        
-        .shop-item {
-            background: rgba(255,255,255,0.2);
-            padding: 15px;
-            border-radius: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .inventory-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 15px 0;
-        }
-        
-        .inventory-item {
-            background: rgba(255,255,255,0.2);
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .inventory-item:hover {
             transform: scale(1.05);
-            background: rgba(255,255,255,0.3);
         }
         
-        .item-common { border: 2px solid #FFFFFF; }
-        .item-rare { border: 2px solid #FFD700; }
-        .item-epic { border: 2px solid #FF6B6B; }
-        .item-legendary { border: 2px solid #00FFFF; }
+        .shop {
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 15px;
+        }
         
         .hidden {
             display: none;
-        }
-        
-        .rarity-badge {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 8px;
-            margin-left: 5px;
-        }
-        
-        .common { background: #666; }
-        .rare { background: #FFD700; color: black; }
-        .epic { background: #FF6B6B; }
-        .legendary { background: #00FFFF; color: black; }
-        
-        .payment-info {
-            background: rgba(255,255,255,0.1);
-            padding: 10px;
-            border-radius: 10px;
-            margin: 10px 0;
-            font-size: 12px;
-            text-align: center;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎁 Magic Eggs</h1>
+        <h1>🐣 Мой Питомец</h1>
         
-        <div class="egg-container">
-            <div id="currentEgg" class="egg">🥚</div>
-            <div id="timer" class="timer hidden">
-                До вылупления: <span id="countdown">72:00:00</span>
-            </div>
-        </div>
+        <div class="pet">🥚</div>
         
         <div class="stats">
-            <div class="stat-item">
-                <span>🍖 Сытость:</span>
-                <span>
-                    <div class="progress-bar">
-                        <div id="hunger-bar" class="progress-fill" style="width: 50%;"></div>
-                    </div>
-                    <span id="hunger">50</span>/100
-                </span>
-            </div>
-            
-            <div class="stat-item">
-                <span>😊 Настроение:</span>
-                <span>
-                    <div class="progress-bar">
-                        <div id="mood-bar" class="progress-fill" style="width: 50%;"></div>
-                    </div>
-                    <span id="mood">50</span>/100
-                </span>
-            </div>
-            
-            <div class="stat-item">
-                <span>💰 Звёзды:</span>
-                <span id="stars">0</span>
-            </div>
-            
-            <div class="stat-item">
-                <span>📦 Предметы:</span>
-                <span id="itemCount">0</span>
-            </div>
-            
-            <div class="stat-item">
-                <span>🎯 Текущее яйцо:</span>
-                <span id="eggType">Обычное</span>
-            </div>
+            <div>Сытость: <span id="hunger">50</span>/100</div>
+            <div>Настроение: <span id="mood">50</span>/100</div>
+            <div>Уровень: <span id="level">1</span></div>
         </div>
         
-        <!-- Кнопки ухода за яйцом -->
-        <div class="care-actions">
-            <button onclick="feedEgg()" class="care-btn">🍖 Покормить</button>
-            <button onclick="playWithEgg()" class="care-btn">🎾 Поиграть</button>
+        <div class="buttons">
+            <button onclick="feed()">🍖 Покормить</button>
+            <button onclick="play()">🎾 Поиграть</button>
+            <button onclick="openShop()" style="grid-column: span 2;">⭐ Магазин</button>
         </div>
         
-        <!-- Основные кнопки -->
-        <div class="main-actions">
-            <button onclick="openShop()" class="shop-btn">🛍️ Магазин</button>
-            <button onclick="openInventory()" class="inventory-btn">📦 Инвентарь</button>
-        </div>
-
-        <div class="payment-info">
-            💫 Для покупок нужны Telegram Stars<br>
-            Получайте звёзды от друзей или покупайте в Telegram
-        </div>
-    </div>
-
-    <!-- Магазин -->
-    <div id="shopModal" class="modal hidden">
-        <div class="modal-content">
-            <h2>🛍️ Магазин Яиц</h2>
-            <div class="egg-shop">
-                <div class="shop-item">
-                    <div>
-                        <div>🥚 Обычное яйцо</div>
-                        <div class="rarity-badge common">Обычное</div>
-                    </div>
-                    <button onclick="initiatePayment('common', 50)">50 ⭐</button>
-                </div>
-                <div class="shop-item">
-                    <div>
-                        <div>🥚 Золотое яйцо</div>
-                        <div class="rarity-badge rare">Редкое</div>
-                    </div>
-                    <button onclick="initiatePayment('rare', 170)">170 ⭐</button>
-                </div>
-                <div class="shop-item">
-                    <div>
-                        <div>🥚 Алмазное яйцо</div>
-                        <div class="rarity-badge legendary">Легендарное</div>
-                    </div>
-                    <button onclick="initiatePayment('legendary', 250)">250 ⭐</button>
-                </div>
-            </div>
-            <div class="payment-info">
-                💰 Оплата через Telegram Stars<br>
-                ⭐ Звёзды списываются с вашего баланса
-            </div>
-            <button onclick="closeShop()" style="width:100%; margin-top:10px;">❌ Закрыть</button>
-        </div>
-    </div>
-
-    <!-- Инвентарь -->
-    <div id="inventoryModal" class="modal hidden">
-        <div class="modal-content">
-            <h2>📦 Инвентарь</h2>
-            <div id="inventoryGrid" class="inventory-grid">
-                <!-- Предметы будут здесь -->
-            </div>
-            <button onclick="closeInventory()" style="width:100%; margin-top:10px;">❌ Закрыть</button>
-        </div>
-    </div>
-
-    <!-- Вылупление -->
-    <div id="hatchModal" class="modal hidden">
-        <div class="modal-content">
-            <h2>🎉 Вылупление!</h2>
-            <div id="hatchResult" style="font-size: 60px; margin: 20px 0;"></div>
-            <div id="hatchText" style="margin: 15px 0;"></div>
-            <button onclick="closeHatch()" style="width:100%;">🎊 Забрать!</button>
-        </div>
-    </div>
-
-    <!-- Окно оплаты -->
-    <div id="paymentModal" class="modal hidden">
-        <div class="modal-content">
-            <h2>💫 Оплата</h2>
-            <div id="paymentText" style="margin: 15px 0; font-size: 18px;"></div>
-            <div class="payment-info">
-                ✅ Оплата через Telegram Stars<br>
-                💰 Сумма: <span id="paymentAmount">0</span> ⭐<br>
-                🎁 Товар: <span id="paymentItem">Яйцо</span>
-            </div>
-            <div style="display: grid; gap: 10px; margin-top: 15px;">
-                <button onclick="processPayment()" style="background: linear-gradient(45deg, #4CAF50, #45a049);">
-                    💳 Оплатить сейчас
-                </button>
-                <button onclick="closePayment()" style="background: linear-gradient(45deg, #ff4757, #ff3742);">
-                    ❌ Отмена
-                </button>
-            </div>
+        <div id="shop" class="shop hidden">
+            <h3>🛍️ Магазин</h3>
+            <button onclick="buyItem('food')" class="shop-btn">🍗 Вкусняшка (10 ⭐)</button>
+            <button onclick="buyItem('toy')" class="shop-btn">🧸 Игрушка (20 ⭐)</button>
+            <button onclick="closeShop()" class="shop-btn">❌ Закрыть</button>
         </div>
     </div>
 
     <script>
-        // Система предметов
-        const ITEMS = {
-            'heart': { emoji: '❤️', name: 'Сердечко', rarity: 'common', value: 15 },
-            'cake': { emoji: '🎂', name: 'Тортик', rarity: 'common', value: 15 },
-            'diamond': { emoji: '💎', name: 'Алмаз', rarity: 'rare', value: 50 },
-            'trophy': { emoji: '🏆', name: 'Трофей', rarity: 'epic', value: 100 },
-            'crown': { emoji: '👑', name: 'Корона', rarity: 'legendary', value: 250 }
-        };
-
-        // Шансы для каждого типа яиц
-        const EGG_CHANCES = {
-            'common': [
-                { item: 'heart', chance: 50 },
-                { item: 'cake', chance: 50 }
-            ],
-            'rare': [
-                { item: 'heart', chance: 30 },
-                { item: 'cake', chance: 30 },
-                { item: 'diamond', chance: 40 }
-            ],
-            'legendary': [
-                { item: 'diamond', chance: 40 },
-                { item: 'trophy', chance: 35 },
-                { item: 'crown', chance: 25 }
-            ]
-        };
-
-        // Данные игры
-        let gameData = {
-            stars: 0, // Начинаем с 0 звёзд!
-            inventory: [],
-            currentEgg: null,
-            eggStartTime: null,
+        // Данные питомца
+        let pet = {
             hunger: 50,
             mood: 50,
-            lastAction: Date.now()
+            level: 1,
+            stars: 100
         };
-
-        // Текущая покупка
-        let pendingPurchase = null;
-
-        // Загрузка сохранения
-        function loadGame() {
-            const saved = localStorage.getItem('magicEggs_save');
-            if (saved) {
-                const savedData = JSON.parse(saved);
-                Object.assign(gameData, savedData);
-            }
-            updateDisplay();
-            checkEggHatch();
-            startAutoDecrease();
+        
+        // Обновление статистики
+        function updateStats() {
+            document.getElementById('hunger').textContent = pet.hunger;
+            document.getElementById('mood').textContent = pet.mood;
+            document.getElementById('level').textContent = pet.level;
         }
-
-        // Сохранение игры
-        function saveGame() {
-            gameData.lastAction = Date.now();
-            localStorage.setItem('magicEggs_save', JSON.stringify(gameData));
-        }
-
-        // Обновление интерфейса
-        function updateDisplay() {
-            document.getElementById('stars').textContent = gameData.stars;
-            document.getElementById('itemCount').textContent = gameData.inventory.length;
-            document.getElementById('hunger').textContent = gameData.hunger;
-            document.getElementById('mood').textContent = gameData.mood;
-            
-            document.getElementById('hunger-bar').style.width = gameData.hunger + '%';
-            document.getElementById('mood-bar').style.width = gameData.mood + '%';
-            
-            if (gameData.currentEgg) {
-                document.getElementById('eggType').textContent = getEggName(gameData.currentEgg.type);
-                document.getElementById('timer').classList.remove('hidden');
-                document.getElementById('currentEgg').className = `egg ${gameData.currentEgg.type}-egg`;
-            } else {
-                document.getElementById('eggType').textContent = 'Нет';
-                document.getElementById('timer').classList.add('hidden');
-                document.getElementById('currentEgg').className = 'egg';
+        
+        // Действия
+        function feed() {
+            if (pet.hunger < 100) {
+                pet.hunger += 10;
+                if (pet.hunger > 100) pet.hunger = 100;
+                updateStats();
+                animatePet();
+                showMessage('Питомец покормлен!');
             }
         }
-
-        // Инициация оплаты
-        function initiatePayment(eggType, price) {
-            pendingPurchase = { type: eggType, price: price };
-            
-            document.getElementById('paymentAmount').textContent = price;
-            document.getElementById('paymentItem').textContent = getEggName(eggType);
-            document.getElementById('paymentText').innerHTML = `
-                Вы покупаете:<br>
-                <strong>${getEggName(eggType)} яйцо</strong><br>
-                за <strong>${price} ⭐</strong>
-            `;
-            
-            document.getElementById('paymentModal').classList.remove('hidden');
+        
+        function play() {
+            if (pet.mood < 100) {
+                pet.mood += 10;
+                pet.hunger -= 5;
+                if (pet.mood > 100) pet.mood = 100;
+                if (pet.hunger < 0) pet.hunger = 0;
+                updateStats();
+                animatePet();
+                showMessage('Питомец поиграл!');
+            }
+        }
+        
+        // Магазин
+        function openShop() {
+            document.getElementById('shop').classList.remove('hidden');
+        }
+        
+        function closeShop() {
+            document.getElementById('shop').classList.add('hidden');
+        }
+        
+        function buyItem(item) {
+            showMessage('Товар куплен! Скоро добавим звёзды!');
             closeShop();
         }
-
-        // Процесс оплаты (интеграция с Telegram Stars)
-        function processPayment() {
-            if (!pendingPurchase) return;
-            
-            const eggType = pendingPurchase.type;
-            const price = pendingPurchase.price;
-            
-            // В реальном приложении здесь будет вызов Telegram Payments API
-            // Для демо просто списываем звёзды
-            if (gameData.stars >= price) {
-                // Успешная оплата
-                gameData.stars -= price;
-                buyEgg(eggType);
-                showMessage(`✅ Оплата прошла успешно! Приобретено ${getEggName(eggType)} яйцо.`);
-            } else {
-                // Недостаточно звёзд
-                showMessage(`❌ Недостаточно звёзд! Нужно ${price} ⭐, у вас ${gameData.stars} ⭐`);
-            }
-            
-            closePayment();
-            pendingPurchase = null;
-        }
-
-        function closePayment() {
-            document.getElementById('paymentModal').classList.add('hidden');
-            pendingPurchase = null;
-        }
-
-        // Покупка яйца (после успешной оплаты)
-        function buyEgg(type) {
-            if (gameData.currentEgg) {
-                alert('❌ У вас уже есть активное яйцо!');
-                return;
-            }
-            
-            gameData.currentEgg = {
-                type: type,
-                startTime: Date.now()
-            };
-            
-            updateDisplay();
-            startEggTimer();
-            saveGame();
-            alert(`🎉 Вы приобрели ${getEggName(type)} яйцо!`);
-        }
-
-        // Уход за яйцом
-        function feedEgg() {
-            if (gameData.hunger < 100) {
-                gameData.hunger = Math.min(gameData.hunger + 10, 100);
-                updateDisplay();
-                animateEgg();
-                showMessage('Яйцо покормлено! +10 к сытости');
-                saveGame();
-            } else {
-                showMessage('Яйцо уже сыто!');
-            }
-        }
-
-        function playWithEgg() {
-            if (gameData.mood < 100) {
-                gameData.mood = Math.min(gameData.mood + 10, 100);
-                gameData.hunger = Math.max(gameData.hunger - 5, 0);
-                updateDisplay();
-                animateEgg();
-                showMessage('Поиграли с яйцом! +10 к настроению');
-                saveGame();
-            } else {
-                showMessage('Яйцо уже довольно!');
-            }
-        }
-
-        // Анимация яйца
-        function animateEgg() {
-            const eggElement = document.getElementById('currentEgg');
-            eggElement.style.transform = 'scale(1.1)';
+        
+        // Анимация
+        function animatePet() {
+            const petElement = document.querySelector('.pet');
+            petElement.style.transform = 'scale(1.1)';
             setTimeout(() => {
-                eggElement.style.transform = 'scale(1)';
+                petElement.style.transform = 'scale(1)';
             }, 200);
         }
-
-        // Авто-уменьшение параметров
-        function startAutoDecrease() {
-            setInterval(() => {
-                if (gameData.hunger > 0) gameData.hunger -= 1;
-                if (gameData.mood > 0) gameData.mood -= 1;
-                updateDisplay();
-                saveGame();
-            }, 60000); // Каждую минуту
-        }
-
-        // Таймер яйца (3 дня)
-        function startEggTimer() {
-            updateEggTimer();
-            setInterval(updateEggTimer, 1000);
-        }
-
-        function updateEggTimer() {
-            if (!gameData.currentEgg) return;
-            
-            const hatchTime = gameData.currentEgg.startTime + (3 * 24 * 60 * 60 * 1000); // 3 дня
-            const now = Date.now();
-            const timeLeft = hatchTime - now;
-            
-            if (timeLeft <= 0) {
-                hatchEgg();
-                return;
-            }
-            
-            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-            
-            document.getElementById('countdown').textContent = 
-                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        // Проверка вылупления при загрузке
-        function checkEggHatch() {
-            if (gameData.currentEgg) {
-                const hatchTime = gameData.currentEgg.startTime + (3 * 24 * 60 * 60 * 1000);
-                if (Date.now() >= hatchTime) {
-                    hatchEgg();
-                } else {
-                    startEggTimer();
-                }
-            }
-        }
-
-        // Вылупление
-        function hatchEgg() {
-            const eggType = gameData.currentEgg.type;
-            const chances = EGG_CHANCES[eggType];
-            
-            // Выбор предмета по шансам
-            const random = Math.random() * 100;
-            let currentChance = 0;
-            let selectedItem = 'heart';
-            
-            for (const chance of chances) {
-                currentChance += chance.chance;
-                if (random <= currentChance) {
-                    selectedItem = chance.item;
-                    break;
-                }
-            }
-            
-            const item = ITEMS[selectedItem];
-            
-            // Добавление в инвентарь
-            gameData.inventory.push({
-                id: Date.now(),
-                type: selectedItem,
-                emoji: item.emoji,
-                name: item.name,
-                rarity: item.rarity,
-                value: item.value
-            });
-            
-            // Показ результата
-            document.getElementById('hatchResult').textContent = item.emoji;
-            document.getElementById('hatchText').innerHTML = `
-                Получен: ${item.name}<br>
-                Редкость: <span class="rarity-badge ${item.rarity}">${getRarityName(item.rarity)}</span><br>
-                Стоимость: ${item.value} ⭐
-            `;
-            
-            document.getElementById('hatchModal').classList.remove('hidden');
-            
-            // Очистка текущего яйца
-            gameData.currentEgg = null;
-            updateDisplay();
-            saveGame();
-        }
-
-        // Инвентарь
-        function openInventory() {
-            const grid = document.getElementById('inventoryGrid');
-            grid.innerHTML = '';
-            
-            if (gameData.inventory.length === 0) {
-                grid.innerHTML = '<div style="grid-column: span 3; padding: 20px;">📭 Инвентарь пуст</div>';
-            } else {
-                gameData.inventory.forEach(item => {
-                    const itemElement = document.createElement('div');
-                    itemElement.className = `inventory-item item-${item.rarity}`;
-                    itemElement.innerHTML = `
-                        <div style="font-size: 30px;">${item.emoji}</div>
-                        <div style="font-size: 12px; margin-top: 5px;">${item.name}</div>
-                        <div style="font-size: 10px; opacity: 0.8;">${item.value} ⭐</div>
-                    `;
-                    itemElement.onclick = () => withdrawItem(item.id);
-                    grid.appendChild(itemElement);
-                });
-            }
-            
-            document.getElementById('inventoryModal').classList.remove('hidden');
-        }
-
-        // Вывод предмета
-        function withdrawItem(itemId) {
-            if (confirm('💸 Вывести этот предмет в звёзды?')) {
-                const itemIndex = gameData.inventory.findIndex(item => item.id === itemId);
-                if (itemIndex !== -1) {
-                    const item = gameData.inventory[itemIndex];
-                    gameData.stars += item.value;
-                    gameData.inventory.splice(itemIndex, 1);
-                    
-                    updateDisplay();
-                    saveGame();
-                    openInventory(); // Обновляем инвентарь
-                    alert(`✅ Предмет выведен! +${item.value} ⭐`);
-                }
-            }
-        }
-
-        // Вспомогательные функции
-        function getEggName(type) {
-            const names = { common: 'Обычное', rare: 'Золотое', legendary: 'Алмазное' };
-            return names[type];
-        }
-
-        function getRarityName(rarity) {
-            const names = { common: 'Обычная', rare: 'Редкая', epic: 'Эпическая', legendary: 'Легендарная' };
-            return names[rarity];
-        }
-
+        
+        // Сообщения
         function showMessage(text) {
             alert(text);
         }
-
-        // Модальные окна
-        function openShop() {
-            document.getElementById('shopModal').classList.remove('hidden');
-        }
-
-        function closeShop() {
-            document.getElementById('shopModal').classList.add('hidden');
-        }
-
-        function openInventory() {
-            document.getElementById('inventoryModal').classList.remove('hidden');
-        }
-
-        function closeInventory() {
-            document.getElementById('inventoryModal').classList.add('hidden');
-        }
-
-        function closeHatch() {
-            document.getElementById('hatchModal').classList.add('hidden');
-        }
-
-        // Инициализация Telegram
-        if (window.Telegram && window.Telegram.WebApp) {
+        
+        // Авто-уменьшение параметров
+        setInterval(() => {
+            if (pet.hunger > 0) pet.hunger -= 1;
+            if (pet.mood > 0) pet.mood -= 1;
+            updateStats();
+        }, 30000);
+        
+        // Инициализация
+        updateStats();
+        
+        // Интеграция с Telegram
+        if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
             Telegram.WebApp.expand();
             Telegram.WebApp.ready();
-            
-            // В реальном приложении здесь будет инициализация платежей
-            // Telegram.WebApp.enableClosingConfirmation();
-            // Telegram.WebApp.MainButton.setText('Оплатить').show().onClick(processPayment);
+        } else {
+            console.log('Telegram Web App not found');
         }
-
-        // Запуск игры
-        loadGame();
     </script>
 </body>
 </html>
