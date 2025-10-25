@@ -259,18 +259,6 @@
             color: #bdc3c7;
         }
 
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 10px 0;
-        }
-
-        .checkbox-group input {
-            width: 20px;
-            height: 20px;
-        }
-
         .btn-danger {
             background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
@@ -406,7 +394,6 @@
 </head>
 <body>
     <div class="game-container">
-        <!-- Уникальный ID игрока -->
         <div class="player-id">ID: <span id="playerId">123456789</span></div>
         
         <div class="header">
@@ -442,31 +429,15 @@
         </div>
         
         <div class="actions-grid">
-            <button class="btn btn-primary" id="feedBtn" onclick="feedPet()">
-                <span>🍎</span>
-                Покормить
-            </button>
-            <button class="btn btn-secondary" id="playBtn" onclick="playWithPet()">
-                <span>🎮</span>
-                Поиграть
-            </button>
+            <button class="btn btn-primary" id="feedBtn">🍎 Покормить</button>
+            <button class="btn btn-secondary" id="playBtn">🎮 Поиграть</button>
         </div>
 
-        <!-- Кнопка админ-панели -->
-        <button class="btn btn-admin" id="adminToggle">
-            <span>🔧</span>
-            Админ Панель
-        </button>
+        <button class="btn btn-admin" id="adminToggle">🔧 Админ Панель</button>
         
         <div class="menu-section">
-            <button class="menu-btn" onclick="openShop()">
-                <span>🛒</span>
-                Магазин
-            </button>
-            <button class="menu-btn" onclick="openInventory()">
-                <span>🎒</span>
-                Инвентарь
-            </button>
+            <button class="menu-btn" id="shopBtn">🛒 Магазин</button>
+            <button class="menu-btn" id="inventoryBtn">🎒 Инвентарь</button>
         </div>
 
         <div class="info-text">
@@ -474,30 +445,22 @@
             Получайте звёзды от друзей или покупайте в Telegram
         </div>
 
-        <!-- Скрытая админ-панель -->
         <div class="admin-panel" id="adminPanel">
             <div class="admin-controls">
                 <div class="admin-header">🔧 Админ Панель</div>
                 
-                <input type="text" class="admin-input" placeholder="ID игрока (например: 123456789)" id="adminPlayerId">
+                <input type="text" class="admin-input" placeholder="ID игрока" id="adminPlayerId">
                 <input type="number" class="admin-input" placeholder="Количество звёзд" id="adminStars">
                 
-                <button class="btn btn-admin" id="adminApply">
-                    <span>✅</span>
-                    Выдать звёзды
-                </button>
-                <button class="btn btn-danger" id="adminReset">
-                    <span>🔄</span>
-                    Сбросить прогресс игрока
-                </button>
+                <button class="btn btn-admin" id="adminApply">✅ Выдать звёзды</button>
+                <button class="btn btn-danger" id="adminReset">🔄 Сбросить прогресс</button>
             </div>
         </div>
     </div>
 
-    <!-- Модальное окно магазина -->
     <div class="shop-modal" id="shopModal">
         <div class="shop-content">
-            <button class="close-btn" onclick="closeShop()">×</button>
+            <button class="close-btn" id="closeShop">×</button>
             <h2>🛒 Магазин</h2>
             
             <div class="shop-item">
@@ -505,7 +468,7 @@
                     <strong>🥚 Золотое яйцо</strong><br>
                     <small>Шансы: Вино 50%, Календарь 25%, Шапка Санты 5%, Конфеты 2%</small>
                 </div>
-                <button class="btn btn-primary" style="padding: 8px 15px;" onclick="buyItem('gold_egg', 100)">100 ⭐</button>
+                <button class="btn btn-primary" style="padding: 8px 15px;" data-item="gold_egg" data-cost="100">100 ⭐</button>
             </div>
             
             <div class="shop-item">
@@ -513,7 +476,7 @@
                     <strong>🍎 Еда (3 шт)</strong><br>
                     <small>Пополните запас еды для кормления</small>
                 </div>
-                <button class="btn btn-primary" style="padding: 8px 15px;" onclick="buyItem('food', 20)">20 ⭐</button>
+                <button class="btn btn-primary" style="padding: 8px 15px;" data-item="food" data-cost="20">20 ⭐</button>
             </div>
             
             <div class="shop-item">
@@ -521,7 +484,7 @@
                     <strong>🥚 Обычное яйцо</strong><br>
                     <small>Шансы: Сердечко 40%, Роза 25%, Календарь 5%</small>
                 </div>
-                <button class="btn btn-primary" style="padding: 8px 15px;" onclick="buyItem('normal_egg', 50)">50 ⭐</button>
+                <button class="btn btn-primary" style="padding: 8px 15px;" data-item="normal_egg" data-cost="50">50 ⭐</button>
             </div>
             
             <div class="info-text" style="margin-top: 20px;">
@@ -530,31 +493,26 @@
         </div>
     </div>
 
-    <!-- Модальное окно подтверждения покупки -->
     <div class="confirm-modal" id="confirmModal">
         <div class="confirm-content">
             <h3>Подтверждение покупки</h3>
             <p id="confirmText">Вы уверены, что хотите купить этот предмет?</p>
             <div class="confirm-buttons">
-                <button class="btn btn-secondary" onclick="closeConfirm()">Отмена</button>
-                <button class="btn btn-primary" id="confirmBuyBtn">Купить</button>
+                <button class="btn btn-secondary" id="cancelBuy">Отмена</button>
+                <button class="btn btn-primary" id="confirmBuy">Купить</button>
             </div>
         </div>
     </div>
 
-    <!-- Модальное окно инвентаря -->
     <div class="inventory-modal" id="inventoryModal">
         <div class="inventory-content">
-            <button class="close-btn" onclick="closeInventory()">×</button>
+            <button class="close-btn" id="closeInventory">×</button>
             <h2>🎒 Инвентарь</h2>
-            
-            <div id="inventoryItems">
-                <!-- Здесь будут отображаться предметы -->
-            </div>
+            <div id="inventoryItems"></div>
         </div>
     </div>
     
-    <div class="notification" id="notification">Изменения применены!</div>
+    <div class="notification" id="notification"></div>
 
     <script>
         // Генерация уникального ID игрока
@@ -580,12 +538,11 @@
             lastStatDecrease: Date.now()
         };
 
-        // Загрузка данных из localStorage
+        // Загрузка данных
         function loadPlayerData() {
             const saved = localStorage.getItem('playerData');
             if (saved) {
                 const data = JSON.parse(saved);
-                // Проверяем, не нужно ли сбросить счетчик еды на новый день
                 const today = new Date().toDateString();
                 if (data.lastFeedDate !== today) {
                     data.foodCount = 3;
@@ -597,7 +554,7 @@
             startStatDecrease();
         }
 
-        // Сохранение данных в localStorage
+        // Сохранение данных
         function savePlayerData() {
             localStorage.setItem('playerData', JSON.stringify(playerData));
         }
@@ -609,7 +566,6 @@
                     const now = Date.now();
                     const timePassed = now - playerData.lastStatDecrease;
                     
-                    // Уменьшаем показатели каждые 30 секунд
                     if (timePassed > 30000) {
                         playerData.hunger = Math.max(0, playerData.hunger - 2);
                         playerData.mood = Math.max(0, playerData.mood - 1);
@@ -617,19 +573,17 @@
                         savePlayerData();
                         updateUI();
                         
-                        // Показываем анимацию изменения
                         showStatChange('hungerChange', '-2');
                         showStatChange('moodChange', '-1');
                     }
                 }
-            }, 5000); // Проверяем каждые 5 секунд
+            }, 5000);
         }
 
         function showStatChange(elementId, change) {
             const element = document.getElementById(elementId);
             element.textContent = change;
             element.style.display = 'flex';
-            
             setTimeout(() => {
                 element.style.display = 'none';
             }, 2000);
@@ -664,10 +618,9 @@
                 eggTypeDisplay.style.display = 'inline-block';
                 deathMessage.style.display = 'none';
                 feedBtn.disabled = playerData.foodCount <= 0;
-                playBtn.disabled = playerData.mood >= 100; // Отключаем если настроение максимальное
+                playBtn.disabled = playerData.mood >= 100;
             }
 
-            // Проверка смерти
             if ((playerData.hunger <= 0 || playerData.mood <= 0) && playerData.isAlive) {
                 playerData.isAlive = false;
                 savePlayerData();
@@ -853,15 +806,12 @@
                 playerData.items.splice(index, 1);
                 savePlayerData();
                 updateUI();
-                openInventory(); // Обновляем инвентарь
+                openInventory();
                 showNotification(`Предмет "${item}" выведен!`);
             }
         }
 
-        // Обработчики событий
-        document.getElementById('confirmBuyBtn').addEventListener('click', confirmPurchase);
-
-        // Функция для показа уведомления
+        // Уведомления
         function showNotification(message) {
             const notification = document.getElementById('notification');
             notification.textContent = message;
@@ -872,15 +822,34 @@
             }, 3000);
         }
 
+        // Обработчики событий
+        document.getElementById('feedBtn').addEventListener('click', feedPet);
+        document.getElementById('playBtn').addEventListener('click', playWithPet);
+        document.getElementById('shopBtn').addEventListener('click', openShop);
+        document.getElementById('inventoryBtn').addEventListener('click', openInventory);
+        document.getElementById('closeShop').addEventListener('click', closeShop);
+        document.getElementById('closeInventory').addEventListener('click', closeInventory);
+        document.getElementById('confirmBuy').addEventListener('click', confirmPurchase);
+        document.getElementById('cancelBuy').addEventListener('click', closeConfirm);
+
+        // Обработчики кнопок магазина
+        document.querySelectorAll('[data-item]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const itemType = this.getAttribute('data-item');
+                const cost = parseInt(this.getAttribute('data-cost'));
+                buyItem(itemType, cost);
+            });
+        });
+
         // Админ-панель
         document.getElementById('adminToggle').addEventListener('click', function() {
             const adminPanel = document.getElementById('adminPanel');
             adminPanel.classList.toggle('active');
             
             if (adminPanel.classList.contains('active')) {
-                this.innerHTML = '<span>🔧</span> Скрыть Админ Панель';
+                this.textContent = '🔧 Скрыть Админ Панель';
             } else {
-                this.innerHTML = '<span>🔧</span> Админ Панель';
+                this.textContent = '🔧 Админ Панель';
             }
         });
 
@@ -893,15 +862,12 @@
                 return;
             }
 
-            // В реальном приложении здесь был бы запрос к серверу
-            // Для демонстрации просто выдаем звезды текущему игроку
             playerData.stars += parseInt(starsInput);
             savePlayerData();
             updateUI();
             
             showNotification(`Выдано ${starsInput} звёзд игроку ${playerIdInput}`);
             
-            // Очищаем поля
             document.getElementById('adminPlayerId').value = '';
             document.getElementById('adminStars').value = '';
         });
@@ -915,7 +881,6 @@
             }
 
             if(confirm(`Сбросить прогресс игрока ${playerIdInput}?`)) {
-                // Сбрасываем прогресс текущего игрока для демонстрации
                 playerData.hunger = 25;
                 playerData.mood = 97;
                 playerData.stars = 0;
@@ -928,12 +893,11 @@
                 updateUI();
                 showNotification(`Прогресс игрока ${playerIdInput} сброшен!`);
                 
-                // Очищаем поле
                 document.getElementById('adminPlayerId').value = '';
             }
         });
 
-        // Закрытие модальных окон при клике вне их
+        // Закрытие модальных окон
         document.getElementById('shopModal').addEventListener('click', function(e) {
             if (e.target === this) closeShop();
         });
