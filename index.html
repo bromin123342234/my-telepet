@@ -281,7 +281,7 @@
             font-size: 1.3em;
         }
 
-        .shop-modal, .confirm-modal, .inventory-modal, .withdraw-modal {
+        .shop-modal, .confirm-modal, .inventory-modal, .withdraw-modal, .quests-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -294,11 +294,11 @@
             align-items: center;
         }
 
-        .shop-modal.active, .confirm-modal.active, .inventory-modal.active, .withdraw-modal.active {
+        .shop-modal.active, .confirm-modal.active, .inventory-modal.active, .withdraw-modal.active, .quests-modal.active {
             display: flex;
         }
 
-        .shop-content, .confirm-content, .inventory-content, .withdraw-content {
+        .shop-content, .confirm-content, .inventory-content, .withdraw-content, .quests-content {
             background: #2c2c2c;
             border-radius: 20px;
             padding: 30px;
@@ -331,6 +331,43 @@
             justify-content: space-between;
             align-items: center;
             border: 1px solid #555;
+        }
+
+        .quest-item {
+            background: #3a3a3a;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 1px solid #555;
+        }
+
+        .quest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .quest-progress {
+            background: #555;
+            border-radius: 10px;
+            height: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .quest-progress-bar {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .quest-reward {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+            font-size: 14px;
         }
 
         .close-btn {
@@ -384,6 +421,21 @@
             font-size: 14px;
         }
 
+        .quest-btn {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .quest-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
         .withdraw-log {
             background: #3a3a3a;
             padding: 10px;
@@ -403,6 +455,37 @@
             font-size: 14px;
             text-align: center;
         }
+
+        .referral-section {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .referral-link {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            word-break: break-all;
+            font-family: monospace;
+            cursor: pointer;
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+        }
+
+        .referral-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -420,7 +503,7 @@
             </div>
         </div>
         
-        <div class="food-count" id="foodCount">Еды: 3/3</div>
+        <div class="food-count" id="foodCount">Еды: 3</div>
         
         <div class="stats-grid">
             <div class="stat-card">
@@ -446,12 +529,30 @@
             <button class="btn btn-secondary" id="playBtn">🎮 Поиграть</button>
         </div>
 
+        <!-- Реферальная секция -->
+        <div class="referral-section">
+            <h3>👥 Пригласи друзей!</h3>
+            <p>Отправь эту ссылку друзьям:</p>
+            <div class="referral-link" id="referralLink">Загрузка...</div>
+            <div class="referral-stats">
+                <div>
+                    <div class="stat-number" id="referralCount">0</div>
+                    <div>Приглашено</div>
+                </div>
+                <div>
+                    <div class="stat-number" id="referralRewards">0</div>
+                    <div>Получено еды</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Админ панель -->
         <button class="btn btn-admin" id="adminToggle" style="display: none;">🔧 Админ Панель</button>
         
         <div class="menu-section">
             <button class="menu-btn" id="shopBtn">🛒 Магазин</button>
             <button class="menu-btn" id="inventoryBtn">🎒 Инвентарь</button>
+            <button class="menu-btn" id="questsBtn">🎯 Задания</button>
         </div>
 
         <div class="balance-info">
@@ -475,6 +576,14 @@
                 
                 <div class="admin-header" style="margin-top: 20px;">📊 Заявки на вывод</div>
                 <div id="withdrawRequests"></div>
+
+                <div class="admin-header" style="margin-top: 20px;">📋 Проверка заданий</div>
+                <input type="text" class="admin-input" placeholder="ID игрока" id="verifyPlayerId">
+                <select class="admin-input" id="verifyQuestType">
+                    <option value="subscribe">Подписка на канал</option>
+                    <option value="invite">Приглашение друзей</option>
+                </select>
+                <button class="btn btn-admin" id="verifyQuest">✅ Подтвердить задание</button>
             </div>
         </div>
     </div>
@@ -542,12 +651,21 @@
             </div>
         </div>
     </div>
+
+    <div class="quests-modal" id="questsModal">
+        <div class="quests-content">
+            <button class="close-btn" onclick="closeQuests()">×</button>
+            <h2>🎯 Задания</h2>
+            <div id="questsList"></div>
+        </div>
+    </div>
     
     <div class="notification" id="notification"></div>
 
     <script>
         // АДМИН ДОСТУП - только для моего ID
         const ADMIN_USER_ID = "USER_1761399526979_swpx4n20o";
+        const BOT_USERNAME = "NFT_c0llecti0n_bot"; // Замените на username вашего бота
         let isAdmin = false;
 
         // Данные игрока
@@ -562,15 +680,42 @@
             isAlive: true,
             eggHatchTime: null,
             isEggReady: false,
-            hasFedToday: false
+            hasFedToday: false,
+            quests: {
+                subscribe: { completed: false, claimed: false },
+                invite: { progress: 0, target: 5, claimed: false }
+            },
+            referralCode: '',
+            referredBy: '',
+            referralCount: 0,
+            referralRewards: 0
         };
 
         // Заявки на вывод
         let withdrawRequests = [];
 
+        // Система заданий
+        const questsData = {
+            subscribe: {
+                title: "📢 Подписка на канал",
+                description: "Подпишитесь на наш Telegram канал",
+                reward: { type: "food", amount: 1 },
+                action: "subscribe"
+            },
+            invite: {
+                title: "👥 Пригласить друзей",
+                description: "Пригласите 5 друзей в игру через бота",
+                reward: { type: "food", amount: 3 },
+                action: "invite"
+            }
+        };
+
         // Инициализация игры
         function initGame() {
             loadPlayerData();
+            
+            // Проверяем реферальную ссылку при загрузке
+            checkReferral();
             
             // Проверяем админский доступ
             if (playerData.id === ADMIN_USER_ID) {
@@ -583,6 +728,38 @@
             startHatchTimer();
             startStatDecrease();
             updateWithdrawRequests();
+            updateReferralLink();
+        }
+
+        // Проверка реферальной ссылки
+        function checkReferral() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCode = urlParams.get('ref');
+            
+            if (refCode && !playerData.referredBy) {
+                // Находим игрока, который пригласил
+                const allPlayerKeys = Object.keys(localStorage).filter(key => key.startsWith('playerData_'));
+                
+                for (let key of allPlayerKeys) {
+                    try {
+                        const player = JSON.parse(localStorage.getItem(key));
+                        if (player.referralCode === refCode && player.id !== playerData.id) {
+                            // Обновляем статистику пригласившего
+                            player.referralCount += 1;
+                            localStorage.setItem('playerData_' + player.id, JSON.stringify(player));
+                            
+                            // Сохраняем кто пригласил текущего игрока
+                            playerData.referredBy = player.id;
+                            savePlayerData();
+                            
+                            showNotification('🎉 Вы зашли по реферальной ссылке!');
+                            break;
+                        }
+                    } catch (e) {
+                        console.error('Error processing referral:', e);
+                    }
+                }
+            }
         }
 
         // Генерация уникального ID игрока
@@ -590,6 +767,9 @@
             if (!localStorage.getItem('playerId')) {
                 const id = 'USER_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 localStorage.setItem('playerId', id);
+                
+                // Генерируем реферальный код
+                playerData.referralCode = 'REF_' + Math.random().toString(36).substr(2, 8).toUpperCase();
             }
             return localStorage.getItem('playerId');
         }
@@ -606,14 +786,8 @@
                 const data = JSON.parse(saved);
                 playerData = { ...playerData, ...data };
                 
-                // Проверяем, не нужно ли сбросить кормление на новый день
-                const today = new Date().toDateString();
-                const lastFeedDate = localStorage.getItem('lastFeedDate_' + playerData.id);
-                if (lastFeedDate !== today) {
-                    playerData.hasFedToday = false;
-                    playerData.foodCount = 3;
-                    localStorage.setItem('lastFeedDate_' + playerData.id, today);
-                }
+                // Убираем лимит на еду - всегда даем 3 еды при заходе
+                playerData.foodCount = 3;
             }
             
             // Загружаем заявки на вывод
@@ -629,19 +803,211 @@
             localStorage.setItem('withdrawRequests', JSON.stringify(withdrawRequests));
         }
 
+        // Обновление реферальной ссылки
+        function updateReferralLink() {
+            const referralLink = document.getElementById('referralLink');
+            // Ссылка на бота с реферальным параметром
+            const botUrl = `https://t.me/${BOT_USERNAME}?start=${playerData.referralCode}`;
+            referralLink.textContent = botUrl;
+            
+            // Обновляем статистику
+            document.getElementById('referralCount').textContent = playerData.referralCount;
+            document.getElementById('referralRewards').textContent = playerData.referralRewards;
+            
+            // Добавляем возможность копирования
+            referralLink.onclick = function() {
+                navigator.clipboard.writeText(botUrl).then(() => {
+                    showNotification('🔗 Ссылка скопирована в буфер обмена!');
+                });
+            };
+        }
+
+        // Система заданий
+        function openQuests() {
+            const questsList = document.getElementById('questsList');
+            let html = '';
+
+            // Задание на подписку
+            const subscribeQuest = playerData.quests.subscribe;
+            const subscribeData = questsData.subscribe;
+            
+            html += `
+                <div class="quest-item">
+                    <div class="quest-header">
+                        <strong>${subscribeData.title}</strong>
+                        ${subscribeQuest.claimed ? 
+                            '<span style="color: #27ae60;">✅ Выполнено</span>' : 
+                            (subscribeQuest.completed ? 
+                                '<button class="quest-btn" onclick="claimQuestReward(\'subscribe\')">🎁 Получить награду</button>' :
+                                '<button class="quest-btn" onclick="openSubscribeLink()">🔗 Перейти в канал</button>'
+                            )
+                        }
+                    </div>
+                    <p>${subscribeData.description}</p>
+                    <div class="quest-reward">
+                        🎁 Награда: ${subscribeData.reward.amount} 🍎 Еда
+                    </div>
+                </div>
+            `;
+
+            // Задание на приглашения
+            const inviteQuest = playerData.quests.invite;
+            const inviteData = questsData.invite;
+            const progressPercent = (inviteQuest.progress / inviteQuest.target) * 100;
+            
+            html += `
+                <div class="quest-item">
+                    <div class="quest-header">
+                        <strong>${inviteData.title}</strong>
+                        ${inviteQuest.claimed ? 
+                            '<span style="color: #27ae60;">✅ Выполнено</span>' : 
+                            (inviteQuest.progress >= inviteQuest.target ? 
+                                '<button class="quest-btn" onclick="claimQuestReward(\'invite\')">🎁 Получить награду</button>' :
+                                `<span>${inviteQuest.progress}/${inviteQuest.target}</span>`
+                            )
+                        }
+                    </div>
+                    <p>${inviteData.description}</p>
+                    <div class="quest-progress">
+                        <div class="quest-progress-bar" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div class="quest-reward">
+                        🎁 Награда: ${inviteData.reward.amount} 🍎 Еда
+                    </div>
+                    <div style="margin-top: 10px; font-size: 12px; background: #444; padding: 8px; border-radius: 5px;">
+                        <strong>Статистика приглашений:</strong><br>
+                        Приглашено друзей: <strong>${playerData.referralCount}</strong><br>
+                        Получено наград: <strong>${playerData.referralRewards}</strong>
+                    </div>
+                </div>
+            `;
+
+            questsList.innerHTML = html;
+            document.getElementById('questsModal').classList.add('active');
+        }
+
+        function closeQuests() {
+            document.getElementById('questsModal').classList.remove('active');
+        }
+
+        function openSubscribeLink() {
+            // Ссылка на ваш канал
+            window.open('https://t.me/MyNFTPet', '_blank');
+            showNotification('После подписки нажмите "Проверить подписку" в заданиях');
+        }
+
+        function claimQuestReward(questType) {
+            const quest = playerData.quests[questType];
+            const questInfo = questsData[questType];
+            
+            if (quest.claimed) {
+                showNotification('Вы уже получили награду за это задание!');
+                return;
+            }
+
+            if (questType === 'subscribe' && !quest.completed) {
+                showNotification('Сначала выполните задание!');
+                return;
+            }
+
+            if (questType === 'invite' && quest.progress < quest.target) {
+                showNotification('Сначала выполните задание!');
+                return;
+            }
+
+            // Выдаем награду
+            if (questInfo.reward.type === 'food') {
+                playerData.foodCount += questInfo.reward.amount;
+                showNotification(`🎉 Получено ${questInfo.reward.amount} еды!`);
+                
+                // Для задания на приглашения обновляем статистику наград
+                if (questType === 'invite') {
+                    playerData.referralRewards += 1;
+                }
+            }
+
+            quest.claimed = true;
+            savePlayerData();
+            updateUI();
+            updateReferralLink();
+            closeQuests();
+        }
+
+        // Админ: проверка выполнения заданий
+        function verifyQuestCompletion() {
+            if (!isAdmin) {
+                showNotification('Доступ запрещен!');
+                return;
+            }
+
+            const playerId = document.getElementById('verifyPlayerId').value;
+            const questType = document.getElementById('verifyQuestType').value;
+
+            if (!playerId) {
+                showNotification('Введите ID игрока!');
+                return;
+            }
+
+            // Загружаем данные игрока
+            const savedPlayerData = localStorage.getItem('playerData_' + playerId);
+            if (!savedPlayerData) {
+                showNotification('Игрок не найден!');
+                return;
+            }
+
+            const player = JSON.parse(savedPlayerData);
+
+            if (questType === 'subscribe') {
+                player.quests.subscribe.completed = true;
+                showNotification(`✅ Подписка подтверждена для игрока ${playerId}`);
+            } else if (questType === 'invite') {
+                player.quests.invite.progress += 1;
+                showNotification(`✅ Приглашение подтверждено для игрока ${playerId}. Теперь: ${player.quests.invite.progress}/5`);
+            }
+
+            // Сохраняем обновленные данные игрока
+            localStorage.setItem('playerData_' + playerId, JSON.stringify(player));
+
+            // Если это текущий игрок - обновляем интерфейс
+            if (playerId === playerData.id) {
+                playerData = player;
+                updateUI();
+            }
+
+            document.getElementById('verifyPlayerId').value = '';
+        }
+
         // Автоматическое уменьшение показателей
         function startStatDecrease() {
+            // Голод уменьшается каждые 10 минут
             setInterval(() => {
                 if (playerData.isAlive) {
-                    // Уменьшаем сытость каждые 30 секунд
-                    playerData.hunger = Math.max(0, playerData.hunger - 1);
-                    // Уменьшаем настроение каждые 45 секунд
-                    playerData.mood = Math.max(0, playerData.mood - 1);
-                    
+                    playerData.hunger = Math.max(0, playerData.hunger - 10);
+                    checkDeath();
                     savePlayerData();
                     updateUI();
                 }
-            }, 30000); // Проверяем каждые 30 секунд
+            }, 600000); // 10 минут = 600000 мс
+
+            // Настроение уменьшается каждые 1.5 часа
+            setInterval(() => {
+                if (playerData.isAlive) {
+                    playerData.mood = Math.max(0, playerData.mood - 10);
+                    checkDeath();
+                    savePlayerData();
+                    updateUI();
+                }
+            }, 5400000); // 1.5 часа = 5400000 мс
+        }
+
+        // Проверка смерти питомца
+        function checkDeath() {
+            if ((playerData.hunger <= 0 || playerData.mood <= 0) && playerData.isAlive) {
+                playerData.isAlive = false;
+                showNotification('💀 Ваш питомец умер от голода или плохого настроения! Купите новое яйцо.');
+                savePlayerData();
+                updateUI();
+            }
         }
 
         // Обновление списка заявок в админ-панели
@@ -744,7 +1110,6 @@
                 playerData.hasFedToday = true;
                 playerData.eggHatchTime = Date.now() + (17 * 60 * 60 * 1000); // 17 часов
                 playerData.isEggReady = false;
-                localStorage.setItem('lastFeedDate_' + playerData.id, new Date().toDateString());
                 showNotification('🍎 Питомец покормлен! Яйцо начало вылупляться... Через 17 часов будет готово!');
             } else {
                 showNotification('🍎 Питомец покормлен!');
@@ -804,7 +1169,7 @@
             document.getElementById('moodValue').textContent = playerData.mood + '/100';
             document.getElementById('starsValue').textContent = playerData.stars;
             document.getElementById('itemsValue').textContent = playerData.items.length;
-            document.getElementById('foodCount').textContent = 'Еды: ' + playerData.foodCount + '/3';
+            document.getElementById('foodCount').textContent = 'Еды: ' + playerData.foodCount;
             
             const eggDisplay = document.getElementById('eggDisplay');
             const eggTypeDisplay = document.getElementById('eggTypeDisplay');
@@ -891,7 +1256,7 @@
                     showNotification('Теперь у вас золотое яйцо!');
                     break;
                 case 'food':
-                    playerData.foodCount = 3;
+                    playerData.foodCount += 3;
                     showNotification('Запас еды пополнен!');
                     break;
                 case 'normal_egg':
@@ -1075,7 +1440,9 @@
         document.getElementById('hatchBtn').onclick = hatchEgg;
         document.getElementById('shopBtn').onclick = openShop;
         document.getElementById('inventoryBtn').onclick = openInventory;
+        document.getElementById('questsBtn').onclick = openQuests;
         document.getElementById('closeShop').onclick = closeShop;
+        document.getElementById('verifyQuest').onclick = verifyQuestCompletion;
 
         // Закрытие модальных окон при клике вне их
         document.getElementById('shopModal').onclick = function(e) {
@@ -1089,6 +1456,9 @@
         };
         document.getElementById('withdrawModal').onclick = function(e) {
             if (e.target === this) closeWithdraw();
+        };
+        document.getElementById('questsModal').onclick = function(e) {
+            if (e.target === this) closeQuests();
         };
 
         // Запуск игры
