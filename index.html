@@ -623,7 +623,7 @@
                 <button class="btn btn-primary" style="width: 100%; margin-top: 15px;" onclick="applyReferral()">✅ Применить код</button>
                 <div style="margin-top: 15px; font-size: 12px; color: #ccc;">
                     <strong>Ваш ID для друзей:</strong><br>
-                    <code style="background: #444; padding: 5px; border-radius: 5px; display: block; margin: 5px 0;">USER_1761399526979_swpx4n20o</code>
+                    <span id="yourIdDisplay" style="background: #444; padding: 5px; border-radius: 5px; display: block; margin: 5px 0; font-family: monospace;">Загрузка...</span>
                     Друзья должны ввести этот код
                 </div>
             </div>
@@ -633,7 +633,7 @@
     <div class="notification" id="notification"></div>
 
     <script>
-        // АДМИН ДОСТУП - только для моего ID
+        // АДМИН ДОСТУП - только для моего ID (замените на свой ID)
         const ADMIN_USER_ID = "USER_1761399526979_swpx4n20o";
         let isAdmin = false;
 
@@ -685,7 +685,10 @@
             // Проверяем реферальную ссылку при загрузке
             checkReferral();
             
-            // Проверяем админский доступ
+            // Проверяем админский доступ - СРАВНИВАЕМ С ID АДМИНА
+            console.log("Player ID:", playerData.id);
+            console.log("Admin ID:", ADMIN_USER_ID);
+            
             if (playerData.id === ADMIN_USER_ID) {
                 isAdmin = true;
                 document.getElementById('adminToggle').style.display = 'block';
@@ -751,6 +754,7 @@
         // Открытие модального окна для ввода кода
         function openReferral() {
             document.getElementById('friendId').value = '';
+            document.getElementById('yourIdDisplay').textContent = playerData.id;
             document.getElementById('referralModal').classList.add('active');
         }
 
