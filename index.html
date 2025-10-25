@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFT Eggs</title>
+    <title>🥚 NFT Eggs | Коллекционные яйца</title>
     <style>
         * {
             margin: 0;
@@ -12,38 +12,65 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
+        :root {
+            --primary: #8B5FBF;
+            --primary-dark: #6B46C1;
+            --secondary: #FF6B6B;
+            --accent: #4ECDC4;
+            --gold: #FFD700;
+            --dark: #1A1A2E;
+            --darker: #16213E;
+            --light: #F8F9FA;
+            --success: #27AE60;
+            --danger: #E74C3C;
+            --warning: #F39C12;
+        }
+
         body {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            background: linear-gradient(135deg, var(--dark) 0%, var(--darker) 100%);
             min-height: 100vh;
             padding: 20px;
-            color: #fff;
+            color: var(--light);
             display: flex;
             justify-content: center;
             align-items: center;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 95, 191, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(78, 205, 196, 0.1) 0%, transparent 20%);
         }
 
         .game-container {
-            background: #2c2c2c;
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(10px);
             border-radius: 25px;
             padding: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            max-width: 430px;
             width: 100%;
             text-align: center;
             position: relative;
-            border: 2px solid #444;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .player-id {
             position: absolute;
             top: 15px;
             left: 15px;
-            background: #ffd700;
-            padding: 5px 10px;
-            border-radius: 10px;
-            font-size: 12px;
+            background: linear-gradient(135deg, var(--gold), #FFA500);
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 11px;
             font-weight: bold;
-            color: #2c3e50;
+            color: var(--dark);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
         }
 
         .header {
@@ -54,55 +81,86 @@
         .header h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
-            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 15px rgba(139, 95, 191, 0.3);
         }
 
         .egg-display {
             margin: 25px 0;
             position: relative;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .egg {
             font-size: 100px;
             margin-bottom: 15px;
             animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+        }
+
+        .custom-duck {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--gold);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+            animation: float 3s ease-in-out infinite;
+            margin: 0 auto 15px auto;
+            display: block;
         }
 
         .egg-type {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            color: #2c3e50;
-            padding: 5px 15px;
-            border-radius: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
             font-weight: bold;
             margin-top: 10px;
             display: inline-block;
+            box-shadow: 0 4px 15px rgba(139, 95, 191, 0.3);
         }
 
         .timer {
-            background: #e74c3c;
+            background: linear-gradient(135deg, var(--warning), var(--danger));
             color: white;
-            padding: 8px 15px;
-            border-radius: 10px;
+            padding: 10px 20px;
+            border-radius: 15px;
             margin: 10px 0;
             font-weight: bold;
             font-size: 16px;
+            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+            display: none;
         }
 
         .hatch-btn {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            background: linear-gradient(135deg, var(--success), #2ecc71);
             color: white;
-            padding: 12px 25px;
+            padding: 15px 30px;
             border: none;
-            border-radius: 10px;
+            border-radius: 15px;
             font-weight: bold;
             cursor: pointer;
             margin: 10px 0;
             font-size: 16px;
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .hatch-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.6);
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-10px) scale(1.05); }
         }
 
         .stats-grid {
@@ -113,28 +171,36 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #4a4a4a, #666);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
             color: white;
             padding: 20px;
-            border-radius: 15px;
+            border-radius: 20px;
             text-align: center;
             position: relative;
-            border: 1px solid #555;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
         }
 
         .stat-value {
             font-size: 1.8em;
             font-weight: bold;
             margin-top: 5px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
 
         .food-count {
-            background: #27ae60;
+            background: linear-gradient(135deg, var(--success), #27ae60);
             color: white;
-            padding: 8px 15px;
-            border-radius: 10px;
-            margin: 10px 0;
+            padding: 12px 20px;
+            border-radius: 15px;
+            margin: 15px 0;
             font-weight: bold;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
         }
 
         .actions-grid {
@@ -156,25 +222,27 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
+            background: linear-gradient(135deg, var(--secondary), #FF4757);
             color: white;
         }
 
         .btn-admin {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            color: #2c3e50;
+            background: linear-gradient(135deg, var(--gold), #FFA500);
+            color: var(--dark);
             font-weight: bold;
             margin: 15px 0;
             width: 100%;
             padding: 15px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
         }
 
         .btn:hover {
@@ -187,7 +255,7 @@
         }
 
         .menu-btn {
-            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            background: linear-gradient(135deg, var(--accent), #1DD1A1);
             color: white;
             padding: 18px;
             border: none;
@@ -201,36 +269,44 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
         }
 
         .menu-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.5);
         }
 
         .info-text {
-            background: #3a3a3a;
+            background: rgba(255, 255, 255, 0.05);
             padding: 15px;
-            border-radius: 12px;
+            border-radius: 15px;
             margin-top: 20px;
             font-size: 14px;
             color: #ccc;
             line-height: 1.4;
-            border: 1px solid #555;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .admin-panel {
-            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9));
             border-radius: 20px;
             padding: 25px;
             margin-top: 20px;
             color: white;
             display: none;
-            border: 2px solid #444;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
         }
 
         .admin-panel.active {
             display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .admin-controls {
@@ -242,14 +318,21 @@
         .admin-input {
             padding: 12px 15px;
             border-radius: 10px;
-            border: 2px solid #555;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             background: rgba(255, 255, 255, 0.1);
             color: white;
             font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .admin-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(139, 95, 191, 0.3);
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            background: linear-gradient(135deg, var(--danger), #C0392B);
             color: white;
             margin-top: 10px;
         }
@@ -259,14 +342,16 @@
             top: 20px;
             right: 20px;
             padding: 15px 25px;
-            background: #27ae60;
+            background: linear-gradient(135deg, var(--success), #27ae60);
             color: white;
-            border-radius: 10px;
+            border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             z-index: 1000;
             opacity: 0;
             transform: translateX(100px);
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .notification.show {
@@ -277,8 +362,9 @@
         .admin-header {
             text-align: center;
             margin-bottom: 20px;
-            color: #ffd700;
+            color: var(--gold);
             font-size: 1.3em;
+            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
         }
 
         .shop-modal, .confirm-modal, .inventory-modal, .withdraw-modal, .quests-modal, .referral-modal {
@@ -288,10 +374,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            animation: fadeIn 0.3s ease-out;
         }
 
         .shop-modal.active, .confirm-modal.active, .inventory-modal.active, .withdraw-modal.active, .quests-modal.active, .referral-modal.active {
@@ -299,46 +387,69 @@
         }
 
         .shop-content, .confirm-content, .inventory-content, .withdraw-content, .quests-content, .referral-content {
-            background: #2c2c2c;
-            border-radius: 20px;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
             padding: 30px;
             max-width: 500px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
             position: relative;
-            border: 2px solid #444;
-            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .shop-item {
-            background: #3a3a3a;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid #555;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .shop-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
         }
 
         .inventory-item {
-            background: #3a3a3a;
-            padding: 15px;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
             margin: 10px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid #555;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .inventory-item:hover {
+            background: rgba(255, 255, 255, 0.08);
         }
 
         .quest-item {
-            background: #3a3a3a;
-            padding: 15px;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
             margin: 10px 0;
-            border: 1px solid #555;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .quest-item:hover {
+            background: rgba(255, 255, 255, 0.08);
         }
 
         .quest-header {
@@ -349,7 +460,7 @@
         }
 
         .quest-progress {
-            background: #555;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             height: 8px;
             margin: 10px 0;
@@ -357,9 +468,10 @@
         }
 
         .quest-progress-bar {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            background: linear-gradient(135deg, var(--success), var(--accent));
             height: 100%;
             transition: width 0.3s ease;
+            border-radius: 10px;
         }
 
         .quest-reward {
@@ -368,13 +480,14 @@
             gap: 5px;
             margin-top: 10px;
             font-size: 14px;
+            color: var(--gold);
         }
 
         .close-btn {
             position: absolute;
             top: 15px;
             right: 15px;
-            background: #e74c3c;
+            background: var(--danger);
             color: white;
             border: none;
             border-radius: 50%;
@@ -385,6 +498,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .close-btn:hover {
+            transform: rotate(90deg);
+            background: #C0392B;
         }
 
         .confirm-buttons {
@@ -395,14 +515,15 @@
         }
 
         .dead-egg {
-            filter: grayscale(1);
+            filter: grayscale(1) brightness(0.5);
             opacity: 0.7;
         }
 
         .death-message {
-            color: #e74c3c;
+            color: var(--danger);
             font-weight: bold;
             margin: 10px 0;
+            text-shadow: 0 2px 10px rgba(231, 76, 60, 0.3);
         }
 
         .empty-inventory {
@@ -412,48 +533,128 @@
         }
 
         .withdraw-btn {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            background: linear-gradient(135deg, var(--success), #27ae60);
             color: white;
-            padding: 8px 15px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .withdraw-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.5);
         }
 
         .quest-btn {
-            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
-            padding: 8px 15px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139, 95, 191, 0.3);
+        }
+
+        .quest-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 95, 191, 0.5);
         }
 
         .quest-btn:disabled {
             background: #666;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .withdraw-log {
-            background: #3a3a3a;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 5px 0;
-            border: 1px solid #555;
-            font-size: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .withdraw-log:hover {
+            background: rgba(255, 255, 255, 0.08);
         }
 
         .balance-info {
-            background: #ffd700;
-            color: #2c3e50;
-            padding: 10px 15px;
-            border-radius: 10px;
-            margin: 10px 0;
+            background: linear-gradient(135deg, var(--gold), #FFA500);
+            color: var(--dark);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 15px 0;
             font-weight: bold;
             font-size: 14px;
             text-align: center;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Анимация пульсации для важных элементов */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Стили для прогресс-баров статистики */
+        .stat-progress {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 6px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .hunger-progress {
+            background: linear-gradient(135deg, var(--success), #27ae60);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .mood-progress {
+            background: linear-gradient(135deg, var(--accent), #1DD1A1);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        /* Улучшенные звезды в статистике */
+        .stars-display {
+            color: var(--gold);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Градиентные границы для премиум элементов */
+        .premium-border {
+            position: relative;
+            border-radius: 20px;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--gold), var(--accent), var(--primary), var(--secondary));
+        }
+
+        .premium-border::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 18px;
+            background: var(--dark);
+            z-index: -1;
         }
     </style>
 </head>
@@ -464,31 +665,38 @@
         <div class="header">
             <h1>🥚 NFT Eggs</h1>
             <div class="egg-display">
-                <div class="egg" id="eggDisplay">🐣</div>
-                <div class="egg-type" id="eggTypeDisplay">Обычное яйцо</div>
+                <!-- ВАША УТКА ЗДЕСЬ -->
+                <img src="https://i.ibb.co/99bLxfGr/image.png" alt="Уникальная утка" class="custom-duck" id="duckDisplay">
+                <div class="egg-type" id="eggTypeDisplay">✨ Уникальная утка</div>
                 <div class="timer" id="eggTimer" style="display: none;">До вылупления: <span id="timerValue">17:00:00</span></div>
-                <button class="hatch-btn" id="hatchBtn" style="display: none;">🎁 Разбить яйцо!</button>
-                <div id="deathMessage" class="death-message" style="display: none;">Яйцо умерло! Купите новое</div>
+                <button class="hatch-btn" id="hatchBtn" style="display: none;">🎁 Получить предмет!</button>
+                <div id="deathMessage" class="death-message" style="display: none;">💀 Утка умерла! Купите новую</div>
             </div>
         </div>
         
-        <div class="food-count" id="foodCount">Еды: 3</div>
+        <div class="food-count" id="foodCount">🍎 Еды: 3</div>
         
         <div class="stats-grid">
             <div class="stat-card">
-                <div>Сытость</div>
+                <div>🍽️ Сытость</div>
                 <div class="stat-value" id="hungerValue">25/100</div>
+                <div class="stat-progress">
+                    <div class="hunger-progress" id="hungerProgress" style="width: 25%;"></div>
+                </div>
             </div>
             <div class="stat-card">
-                <div>Настроение</div>
+                <div>😊 Настроение</div>
                 <div class="stat-value" id="moodValue">97/100</div>
+                <div class="stat-progress">
+                    <div class="mood-progress" id="moodProgress" style="width: 97%;"></div>
+                </div>
             </div>
             <div class="stat-card">
-                <div>Звёзды</div>
-                <div class="stat-value" id="starsValue">0</div>
+                <div>⭐ Звёзды</div>
+                <div class="stat-value stars-display" id="starsValue">0</div>
             </div>
             <div class="stat-card">
-                <div>Предметы</div>
+                <div>🎒 Предметы</div>
                 <div class="stat-value" id="itemsValue">0</div>
             </div>
         </div>
@@ -505,16 +713,16 @@
             <button class="menu-btn" id="shopBtn">🛒 Магазин</button>
             <button class="menu-btn" id="inventoryBtn">🎒 Инвентарь</button>
             <button class="menu-btn" id="questsBtn">🎯 Задания</button>
-            <button class="menu-btn" id="referralBtn">👥 Ввести код друга</button>
+            <button class="menu-btn" id="referralBtn">👥 Реферальная система</button>
         </div>
 
-        <div class="balance-info">
+        <div class="balance-info pulse">
             💎 Чтобы пополнить баланс, подарите подарок на аккаунт @NFT_c0llecti0n
         </div>
 
         <div class="info-text">
-            <strong>[🔍] Для покупок нужны Telegram Stars</strong><br>
-            Получайте звёзды от друзей или покупайте в Telegram
+            <strong>🎮 Ухаживайте за уткой!</strong><br>
+            Кормите и играйте с уткой, чтобы получить уникальные NFT-предметы
         </div>
 
         <div class="admin-panel" id="adminPanel">
@@ -549,10 +757,10 @@
             
             <div class="shop-item">
                 <div>
-                    <strong>🥚 Золотое яйцо</strong><br>
+                    <strong>✨ Золотая утка</strong><br>
                     <small>Шансы: Вино 50%, Календарь 25%, Шапка Санты 5%, Конфеты 2%</small>
                 </div>
-                <button class="btn btn-primary" style="padding: 8px 15px;" onclick="buyItem('gold_egg', 100)">100 ⭐</button>
+                <button class="btn btn-primary" style="padding: 10px 20px;" onclick="buyItem('gold_egg', 100)">100 ⭐</button>
             </div>
             
             <div class="shop-item">
@@ -560,15 +768,15 @@
                     <strong>🍎 Еда (3 шт)</strong><br>
                     <small>Пополните запас еды для кормления</small>
                 </div>
-                <button class="btn btn-primary" style="padding: 8px 15px;" onclick="buyItem('food', 20)">20 ⭐</button>
+                <button class="btn btn-primary" style="padding: 10px 20px;" onclick="buyItem('food', 20)">20 ⭐</button>
             </div>
             
             <div class="shop-item">
                 <div>
-                    <strong>🥚 Обычное яйцо</strong><br>
+                    <strong>🦆 Обычная утка</strong><br>
                     <small>Шансы: Сердечко 40%, Роза 25%, Календарь 5%</small>
                 </div>
-                <button class="btn btn-primary" style="padding: 8px 15px;" onclick="buyItem('normal_egg', 50)">50 ⭐</button>
+                <button class="btn btn-primary" style="padding: 10px 20px;" onclick="buyItem('normal_egg', 50)">50 ⭐</button>
             </div>
         </div>
     </div>
@@ -616,15 +824,15 @@
     <div class="referral-modal" id="referralModal">
         <div class="referral-content">
             <button class="close-btn" onclick="closeReferral()">×</button>
-            <h2>👥 Ввести код друга</h2>
+            <h2>👥 Реферальная система</h2>
             <div class="info-text">
                 <p>Введите ID вашего друга, чтобы получить бонус:</p>
                 <input type="text" class="admin-input" id="friendId" placeholder="ID друга">
                 <button class="btn btn-primary" style="width: 100%; margin-top: 15px;" onclick="applyReferral()">✅ Применить код</button>
                 <div style="margin-top: 15px; font-size: 12px; color: #ccc;">
                     <strong>Ваш ID для друзей:</strong><br>
-                    <span id="yourIdDisplay" style="background: #444; padding: 5px; border-radius: 5px; display: block; margin: 5px 0; font-family: monospace;">Загрузка...</span>
-                    Друзья должны ввести этот код
+                    <span id="yourIdDisplay" style="background: #444; padding: 8px; border-radius: 8px; display: block; margin: 8px 0; font-family: monospace; word-break: break-all;">Загрузка...</span>
+                    Друзья должны ввести этот код при регистрации
                 </div>
             </div>
         </div>
@@ -633,7 +841,7 @@
     <div class="notification" id="notification"></div>
 
     <script>
-        // АДМИН ДОСТУП - только для моего ID (замените на свой ID)
+        // АДМИН ДОСТУП - только для моего ID
         const ADMIN_USER_ID = "USER_1761399526979_swpx4n20o";
         let isAdmin = false;
 
@@ -685,14 +893,14 @@
             // Проверяем реферальную ссылку при загрузке
             checkReferral();
             
-            // Проверяем админский доступ - СРАВНИВАЕМ С ID АДМИНА
+            // Проверяем админский доступ
             console.log("Player ID:", playerData.id);
             console.log("Admin ID:", ADMIN_USER_ID);
             
             if (playerData.id === ADMIN_USER_ID) {
                 isAdmin = true;
                 document.getElementById('adminToggle').style.display = 'block';
-                showNotification('Добро пожаловать, Админ!');
+                showNotification('👑 Добро пожаловать, Админ!');
             }
             
             updateUI();
@@ -714,12 +922,12 @@
         // Применение реферального кода
         function applyReferralCode(friendId) {
             if (friendId === playerData.id) {
-                showNotification('Нельзя использовать свой собственный ID!');
+                showNotification('❌ Нельзя использовать свой собственный ID!');
                 return false;
             }
 
             if (playerData.referredBy) {
-                showNotification('Вы уже использовали реферальный код!');
+                showNotification('❌ Вы уже использовали реферальный код!');
                 return false;
             }
 
@@ -767,7 +975,7 @@
             const friendId = document.getElementById('friendId').value.trim();
             
             if (!friendId) {
-                showNotification('Введите ID друга!');
+                showNotification('❌ Введите ID друга!');
                 return;
             }
 
@@ -866,8 +1074,8 @@
                     <div class="quest-reward">
                         🎁 Награда: ${inviteData.reward.amount} 🍎 Еда
                     </div>
-                    <div style="margin-top: 10px; font-size: 12px; background: #444; padding: 8px; border-radius: 5px;">
-                        <strong>Статистика приглашений:</strong><br>
+                    <div style="margin-top: 10px; font-size: 12px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                        <strong>📊 Статистика приглашений:</strong><br>
                         Приглашено друзей: <strong>${playerData.referralCount}</strong><br>
                         Получено наград: <strong>${playerData.referralRewards}</strong>
                     </div>
@@ -885,7 +1093,7 @@
         function openSubscribeLink() {
             // Ссылка на ваш канал
             window.open('https://t.me/MyNFTPet', '_blank');
-            showNotification('После подписки нажмите "Проверить подписку" в заданиях');
+            showNotification('📢 После подписки нажмите "Проверить подписку" в заданиях');
         }
 
         function claimQuestReward(questType) {
@@ -893,17 +1101,17 @@
             const questInfo = questsData[questType];
             
             if (quest.claimed) {
-                showNotification('Вы уже получили награду за это задание!');
+                showNotification('❌ Вы уже получили награду за это задание!');
                 return;
             }
 
             if (questType === 'subscribe' && !quest.completed) {
-                showNotification('Сначала выполните задание!');
+                showNotification('❌ Сначала выполните задание!');
                 return;
             }
 
             if (questType === 'invite' && quest.progress < quest.target) {
-                showNotification('Сначала выполните задание!');
+                showNotification('❌ Сначала выполните задание!');
                 return;
             }
 
@@ -927,7 +1135,7 @@
         // Админ: проверка выполнения заданий
         function verifyQuestCompletion() {
             if (!isAdmin) {
-                showNotification('Доступ запрещен!');
+                showNotification('❌ Доступ запрещен!');
                 return;
             }
 
@@ -935,14 +1143,14 @@
             const questType = document.getElementById('verifyQuestType').value;
 
             if (!playerId) {
-                showNotification('Введите ID игрока!');
+                showNotification('❌ Введите ID игрока!');
                 return;
             }
 
             // Загружаем данные игрока
             const savedPlayerData = localStorage.getItem('playerData_' + playerId);
             if (!savedPlayerData) {
-                showNotification('Игрок не найден!');
+                showNotification('❌ Игрок не найден!');
                 return;
             }
 
@@ -980,7 +1188,7 @@
                     updateUI();
                     
                     if (playerData.hunger <= 30 || playerData.mood <= 30) {
-                        showNotification('⚠️ Внимание! У питомца низкие показатели!');
+                        showNotification('⚠️ Внимание! У утки низкие показатели!');
                     }
                 }
             }, 3600000); // 1 час = 3600000 мс
@@ -990,7 +1198,7 @@
         function checkDeath() {
             if ((playerData.hunger <= 0 || playerData.mood <= 0) && playerData.isAlive) {
                 playerData.isAlive = false;
-                showNotification('💀 Ваш питомец умер от голода или плохого настроения! Купите новое яйцо.');
+                showNotification('💀 Ваша утка умерла от голода или плохого настроения! Купите новую.');
                 savePlayerData();
                 updateUI();
             }
@@ -1008,11 +1216,11 @@
                 withdrawRequests.forEach((request, index) => {
                     html += `
                         <div class="withdraw-log">
-                            <strong>ID игрока:</strong> ${request.playerId}<br>
-                            <strong>Предмет:</strong> ${request.item}<br>
-                            <strong>Telegram:</strong> ${request.telegram}<br>
-                            <strong>Время:</strong> ${new Date(request.timestamp).toLocaleString()}<br>
-                            <button class="withdraw-btn" onclick="completeWithdraw(${index})" style="margin-top: 5px;">✅ Выполнено</button>
+                            <strong>👤 ID игрока:</strong> ${request.playerId}<br>
+                            <strong>🎁 Предмет:</strong> ${request.item}<br>
+                            <strong>📱 Telegram:</strong> ${request.telegram}<br>
+                            <strong>🕒 Время:</strong> ${new Date(request.timestamp).toLocaleString()}<br>
+                            <button class="withdraw-btn" onclick="completeWithdraw(${index})" style="margin-top: 8px;">✅ Выполнено</button>
                         </div>
                     `;
                 });
@@ -1031,7 +1239,7 @@
                         playerData.isEggReady = true;
                         savePlayerData();
                         updateUI();
-                        showNotification('🎉 Яйцо готово к вылуплению! Нажмите "Разбить яйцо"');
+                        showNotification('🎉 Утка готова к получению предмета! Нажмите "Получить предмет"');
                     } else {
                         updateTimerDisplay(timeLeft);
                     }
@@ -1080,11 +1288,11 @@
         // Функции питомца
         function feedPet() {
             if (!playerData.isAlive) {
-                showNotification('Яйцо умерло! Купите новое в магазине');
+                showNotification('💀 Утка умерла! Купите новую в магазине');
                 return;
             }
             if (playerData.foodCount <= 0) {
-                showNotification('Закончилась еда! Купите в магазине');
+                showNotification('❌ Закончилась еда! Купите в магазине');
                 return;
             }
             
@@ -1096,9 +1304,9 @@
                 playerData.hasFedToday = true;
                 playerData.eggHatchTime = Date.now() + (17 * 60 * 60 * 1000); // 17 часов
                 playerData.isEggReady = false;
-                showNotification('🍎 Питомец покормлен! Яйцо начало вылупляться... Через 17 часов будет готово!');
+                showNotification('🍎 Утка покормлена! Предмет будет готов через 17 часов!');
             } else {
-                showNotification('🍎 Питомец покормлен!');
+                showNotification('🍎 Утка покормлена!');
             }
             
             savePlayerData();
@@ -1107,23 +1315,23 @@
 
         function playWithPet() {
             if (!playerData.isAlive) {
-                showNotification('Яйцо умерло! Купите новое в магазине');
+                showNotification('💀 Утка умерла! Купите новую в магазине');
                 return;
             }
             if (playerData.mood >= 100) {
-                showNotification('Настроение питомца уже максимальное!');
+                showNotification('😊 Настроение утки уже максимальное!');
                 return;
             }
             playerData.mood = Math.min(100, playerData.mood + 15);
             playerData.hunger = Math.max(0, playerData.hunger - 10);
             savePlayerData();
             updateUI();
-            showNotification('Вы поиграли с питомцем! 🎮');
+            showNotification('🎮 Вы поиграли с уткой!');
         }
 
         function hatchEgg() {
             if (!playerData.isEggReady) {
-                showNotification('Яйцо еще не готово!');
+                showNotification('❌ Предмет еще не готов!');
                 return;
             }
 
@@ -1138,10 +1346,10 @@
                 });
                 showNotification(`🎉 Поздравляем! Вам выпало: ${gift}`);
             } else {
-                showNotification('К сожалению, в яйце ничего не оказалось 😢');
+                showNotification('😢 К сожалению, ничего не выпало');
             }
 
-            // Сбрасываем состояние яйца
+            // Сбрасываем состояние
             playerData.eggHatchTime = null;
             playerData.isEggReady = false;
             playerData.hasFedToday = false;
@@ -1155,9 +1363,13 @@
             document.getElementById('moodValue').textContent = playerData.mood + '/100';
             document.getElementById('starsValue').textContent = playerData.stars;
             document.getElementById('itemsValue').textContent = playerData.items.length;
-            document.getElementById('foodCount').textContent = 'Еды: ' + playerData.foodCount;
+            document.getElementById('foodCount').textContent = '🍎 Еды: ' + playerData.foodCount;
             
-            const eggDisplay = document.getElementById('eggDisplay');
+            // Обновляем прогресс-бары
+            document.getElementById('hungerProgress').style.width = playerData.hunger + '%';
+            document.getElementById('moodProgress').style.width = playerData.mood + '%';
+            
+            const duckDisplay = document.getElementById('duckDisplay');
             const eggTypeDisplay = document.getElementById('eggTypeDisplay');
             const timer = document.getElementById('eggTimer');
             const hatchBtn = document.getElementById('hatchBtn');
@@ -1166,8 +1378,8 @@
             const playBtn = document.getElementById('playBtn');
 
             if (!playerData.isAlive) {
-                eggDisplay.textContent = '💀';
-                eggDisplay.classList.add('dead-egg');
+                duckDisplay.style.filter = 'grayscale(1) brightness(0.5)';
+                duckDisplay.style.opacity = '0.7';
                 eggTypeDisplay.style.display = 'none';
                 timer.style.display = 'none';
                 hatchBtn.style.display = 'none';
@@ -1175,9 +1387,9 @@
                 feedBtn.disabled = true;
                 playBtn.disabled = true;
             } else {
-                eggDisplay.textContent = playerData.eggType === 'gold' ? '🥚' : '🐣';
-                eggDisplay.classList.remove('dead-egg');
-                eggTypeDisplay.textContent = playerData.eggType === 'gold' ? 'Золотое яйцо' : 'Обычное яйцо';
+                duckDisplay.style.filter = 'none';
+                duckDisplay.style.opacity = '1';
+                eggTypeDisplay.textContent = playerData.eggType === 'gold' ? '✨ Золотая утка' : '🦆 Уникальная утка';
                 eggTypeDisplay.style.display = 'inline-block';
                 deathMessage.style.display = 'none';
                 
@@ -1216,9 +1428,9 @@
             
             let itemName = '';
             switch(itemType) {
-                case 'gold_egg': itemName = 'Золотое яйцо'; break;
+                case 'gold_egg': itemName = 'Золотая утка'; break;
                 case 'food': itemName = 'Еда (3 шт)'; break;
-                case 'normal_egg': itemName = 'Обычное яйцо'; break;
+                case 'normal_egg': itemName = 'Обычная утка'; break;
             }
             
             document.getElementById('confirmText').textContent = `Вы уверены, что хотите купить ${itemName} за ${cost} звёзд?`;
@@ -1229,7 +1441,7 @@
             if (!currentItemToBuy) return;
 
             if (playerData.stars < currentItemToBuy.cost) {
-                showNotification('Недостаточно звёзд!');
+                showNotification('❌ Недостаточно звёзд!');
                 closeConfirm();
                 return;
             }
@@ -1239,18 +1451,18 @@
             switch(currentItemToBuy.type) {
                 case 'gold_egg':
                     playerData.eggType = 'gold';
-                    showNotification('Теперь у вас золотое яйцо!');
+                    showNotification('✨ Теперь у вас золотая утка!');
                     break;
                 case 'food':
                     playerData.foodCount += 3;
-                    showNotification('Запас еды пополнен!');
+                    showNotification('🍎 Запас еды пополнен!');
                     break;
                 case 'normal_egg':
                     playerData.isAlive = true;
                     playerData.hunger = 50;
                     playerData.mood = 50;
                     playerData.eggType = 'normal';
-                    showNotification('Новое яйцо куплено!');
+                    showNotification('🦆 Новая утка куплена!');
                     break;
             }
 
@@ -1275,7 +1487,7 @@
                 inventoryItems.innerHTML = `
                     <div class="empty-inventory">
                         <h3>📦 Инвентарь пуст</h3>
-                        <p>Вылупите яйцо, чтобы получить предметы!</p>
+                        <p>Ухаживайте за уткой, чтобы получить предметы!</p>
                     </div>
                 `;
             } else {
@@ -1314,7 +1526,7 @@
         function submitWithdraw() {
             const telegram = document.getElementById('telegramUsername').value;
             if (!telegram) {
-                showNotification('Введите Telegram username!');
+                showNotification('❌ Введите Telegram username!');
                 return;
             }
 
@@ -1347,7 +1559,7 @@
         // Админ: выполнить вывод
         function completeWithdraw(requestIndex) {
             if (!isAdmin) {
-                showNotification('Доступ запрещен!');
+                showNotification('❌ Доступ запрещен!');
                 return;
             }
 
@@ -1381,7 +1593,7 @@
 
         document.getElementById('adminApply').onclick = function() {
             if (!isAdmin) {
-                showNotification('Доступ запрещен!');
+                showNotification('❌ Доступ запрещен!');
                 return;
             }
 
@@ -1389,19 +1601,19 @@
             const starsInput = parseInt(document.getElementById('adminStars').value);
 
             if (!playerIdInput || !starsInput) {
-                showNotification('Заполните ID игрока и количество звёзд!');
+                showNotification('❌ Заполните ID игрока и количество звёзд!');
                 return;
             }
 
             if (starsInput <= 0) {
-                showNotification('Количество звёзд должно быть больше 0!');
+                showNotification('❌ Количество звёзд должно быть больше 0!');
                 return;
             }
 
             // Находим игрока и выдаем звезды
             const savedPlayerData = localStorage.getItem('playerData_' + playerIdInput);
             if (!savedPlayerData) {
-                showNotification('Игрок не найден!');
+                showNotification('❌ Игрок не найден!');
                 return;
             }
 
@@ -1425,14 +1637,14 @@
 
         document.getElementById('adminReset').onclick = function() {
             if (!isAdmin) {
-                showNotification('Доступ запрещен!');
+                showNotification('❌ Доступ запрещен!');
                 return;
             }
 
             const playerIdInput = document.getElementById('adminPlayerId').value;
             
             if (!playerIdInput) {
-                showNotification('Введите ID игрока для сброса!');
+                showNotification('❌ Введите ID игрока для сброса!');
                 return;
             }
 
