@@ -96,13 +96,6 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .egg {
-            font-size: 100px;
-            margin-bottom: 15px;
-            animation: float 3s ease-in-out infinite;
-            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
-        }
-
         .custom-duck {
             width: 140px;
             height: 140px;
@@ -1204,11 +1197,18 @@
             }
         }
 
-        // Обновление списка заявок в админ-панели
+        // Обновление списка заявок в админ-панели - ИСПРАВЛЕННАЯ ФУНКЦИЯ
         function updateWithdrawRequests() {
             if (!isAdmin) return;
             
             const requestsContainer = document.getElementById('withdrawRequests');
+            
+            // Загружаем актуальные данные заявок
+            const savedRequests = localStorage.getItem('withdrawRequests');
+            if (savedRequests) {
+                withdrawRequests = JSON.parse(savedRequests);
+            }
+            
             if (withdrawRequests.length === 0) {
                 requestsContainer.innerHTML = '<div class="info-text">Нет заявок на вывод</div>';
             } else {
@@ -1523,10 +1523,16 @@
             currentWithdrawItem = null;
         }
 
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ ВЫВОДА
         function submitWithdraw() {
-            const telegram = document.getElementById('telegramUsername').value;
+            const telegram = document.getElementById('telegramUsername').value.trim();
             if (!telegram) {
                 showNotification('❌ Введите Telegram username!');
+                return;
+            }
+
+            if (!telegram.startsWith('@')) {
+                showNotification('❌ Telegram username должен начинаться с @!');
                 return;
             }
 
@@ -1542,7 +1548,17 @@
                 status: 'pending'
             };
             
+            // Загружаем текущие заявки
+            const savedRequests = localStorage.getItem('withdrawRequests');
+            if (savedRequests) {
+                withdrawRequests = JSON.parse(savedRequests);
+            }
+            
+            // Добавляем новую заявку
             withdrawRequests.push(withdrawRequest);
+            
+            // Сохраняем обновленные заявки
+            localStorage.setItem('withdrawRequests', JSON.stringify(withdrawRequests));
             
             // Удаляем предмет из инвентаря
             playerData.items.splice(currentWithdrawItem, 1);
@@ -1553,10 +1569,12 @@
             closeInventory();
             
             showNotification('✅ Заявка на вывод отправлена! С вами свяжутся в Telegram.');
+            
+            // Обновляем список заявок в админ-панели
             updateWithdrawRequests();
         }
 
-        // Админ: выполнить вывод
+        // Админ: выполнить вывод - ИСПРАВЛЕННАЯ ФУНКЦИЯ
         function completeWithdraw(requestIndex) {
             if (!isAdmin) {
                 showNotification('❌ Доступ запрещен!');
@@ -1565,8 +1583,13 @@
 
             const request = withdrawRequests[requestIndex];
             if (confirm(`Отметить заявку от ${request.playerId} как выполненную?\nПредмет: ${request.item}\nTelegram: ${request.telegram}`)) {
+                // Удаляем заявку из массива
                 withdrawRequests.splice(requestIndex, 1);
-                savePlayerData();
+                
+                // Сохраняем обновленные заявки
+                localStorage.setItem('withdrawRequests', JSON.stringify(withdrawRequests));
+                
+                // Обновляем отображение
                 updateWithdrawRequests();
                 showNotification('✅ Заявка отмечена как выполненная!');
             }
@@ -1589,6 +1612,11 @@
             const adminPanel = document.getElementById('adminPanel');
             adminPanel.classList.toggle('active');
             this.textContent = adminPanel.classList.contains('active') ? '🔧 Скрыть Админ Панель' : '🔧 Админ Панель';
+            
+            // При открытии админ-панели обновляем список заявок
+            if (adminPanel.classList.contains('active')) {
+                updateWithdrawRequests();
+            }
         };
 
         document.getElementById('adminApply').onclick = function() {
