@@ -1597,11 +1597,12 @@
             }
         }
 
+        // ИЗМЕНЕНИЕ: Теперь голод тратится по 1 единице каждые 10 минут
         function startStatDecrease() {
             setInterval(() => {
                 if (playerData.isAlive) {
-                    playerData.hunger = Math.max(0, playerData.hunger - 10);
-                    playerData.mood = Math.max(0, playerData.mood - 10);
+                    playerData.hunger = Math.max(0, playerData.hunger - 1);
+                    playerData.mood = Math.max(0, playerData.mood - 1);
                     checkDeath();
                     savePlayerData();
                     updateUI();
@@ -1610,7 +1611,7 @@
                         showNotification('⚠️ Внимание! У утки низкие показатели!');
                     }
                 }
-            }, 3600000);
+            }, 600000); // 10 минут = 600000 миллисекунд
         }
 
         function checkDeath() {
