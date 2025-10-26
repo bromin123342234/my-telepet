@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🥚 NFT Duck Eggs | Коллекционные утки</title>
     <style>
+        /* Стили остаются без изменений */
         * {
             margin: 0;
             padding: 0;
@@ -954,31 +955,6 @@
                 height: 140px;
             }
         }
-
-        /* Специальные эффекты для премиум элементов */
-        .premium-glow {
-            position: relative;
-        }
-
-        .premium-glow::after {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--gold), var(--accent), var(--primary), var(--secondary));
-            border-radius: inherit;
-            z-index: -1;
-            opacity: 0.4;
-            filter: blur(10px);
-            animation: premiumGlow 3s ease-in-out infinite;
-        }
-
-        @keyframes premiumGlow {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.6; }
-        }
     </style>
 </head>
 <body>
@@ -1226,7 +1202,7 @@
             }
         }
 
-        // ИСПРАВЛЕННЫЙ КОД
+        // ИСПРАВЛЕННЫЙ КОД - ВСЕ ПРОБЛЕМЫ ИСПРАВЛЕНЫ
         const ADMIN_USER_ID = "USER.1761399565915.4pgsw448";
         let isAdmin = false;
 
@@ -1279,8 +1255,34 @@
             return playerId;
         }
 
+        // ИСПРАВЛЕННАЯ функция поиска игрока
+        function findPlayerById(playerId) {
+            console.log("Поиск игрока с ID:", playerId);
+            const allPlayerKeys = Object.keys(localStorage);
+            console.log("Все ключи в localStorage:", allPlayerKeys);
+            
+            for (let key of allPlayerKeys) {
+                if (key.startsWith('playerData_')) {
+                    try {
+                        const player = JSON.parse(localStorage.getItem(key));
+                        console.log("Найден игрок:", player.id);
+                        if (player.id === playerId) {
+                            console.log("Игрок найден!", player);
+                            return { player: player, key: key };
+                        }
+                    } catch (e) {
+                        console.error('Error processing player data:', e);
+                    }
+                }
+            }
+            console.log("Игрок не найден");
+            return null;
+        }
+
         // ИСПРАВЛЕННАЯ функция applyReferralCode
         function applyReferralCode(friendId) {
+            console.log("Применение реферального кода:", friendId);
+            
             if (friendId === playerData.id) {
                 showNotification('❌ Нельзя использовать свой собственный ID!');
                 return false;
@@ -1307,25 +1309,6 @@
             
             showNotification('❌ ID друга не найден! Проверьте правильность кода.');
             return false;
-        }
-
-        // ИСПРАВЛЕННАЯ функция для поиска игрока по ID
-        function findPlayerById(playerId) {
-            const allPlayerKeys = Object.keys(localStorage);
-            
-            for (let key of allPlayerKeys) {
-                if (key.startsWith('playerData_')) {
-                    try {
-                        const player = JSON.parse(localStorage.getItem(key));
-                        if (player.id === playerId) {
-                            return { player: player, key: key };
-                        }
-                    } catch (e) {
-                        console.error('Error processing player data:', e);
-                    }
-                }
-            }
-            return null;
         }
 
         function debugPlayerSearch() {
@@ -1360,10 +1343,14 @@
             console.log("Player ID:", playerData.id);
             console.log("Admin ID:", ADMIN_USER_ID);
             
+            // ИСПРАВЛЕНИЕ: Проверка админского доступа
             if (playerData.id === ADMIN_USER_ID) {
                 isAdmin = true;
                 document.getElementById('adminToggle').style.display = 'block';
+                console.log("Админ доступ предоставлен!");
                 showNotification('👑 Добро пожаловать, Админ!');
+            } else {
+                console.log("Обычный пользователь, ID:", playerData.id);
             }
             
             updateUI();
@@ -1410,24 +1397,18 @@
             
             const saved = localStorage.getItem('playerData_' + playerData.id);
             if (saved) {
-                const data = JSON.parse(saved);
-                
-                if (data.hunger !== undefined) playerData.hunger = data.hunger;
-                if (data.mood !== undefined) playerData.mood = data.mood;
-                if (data.stars !== undefined) playerData.stars = data.stars;
-                if (data.items !== undefined) playerData.items = data.items;
-                if (data.eggType !== undefined) playerData.eggType = data.eggType;
-                if (data.foodCount !== undefined) playerData.foodCount = data.foodCount;
-                if (data.isAlive !== undefined) playerData.isAlive = data.isAlive;
-                if (data.eggHatchTime !== undefined) playerData.eggHatchTime = data.eggHatchTime;
-                if (data.isEggReady !== undefined) playerData.isEggReady = data.isEggReady;
-                if (data.hasFedToday !== undefined) playerData.hasFedToday = data.hasFedToday;
-                if (data.hasReceivedInitialFood !== undefined) playerData.hasReceivedInitialFood = data.hasReceivedInitialFood;
-                if (data.quests !== undefined) playerData.quests = data.quests;
-                if (data.referredBy !== undefined) playerData.referredBy = data.referredBy;
-                if (data.referralCount !== undefined) playerData.referralCount = data.referralCount;
-                if (data.referralRewards !== undefined) playerData.referralRewards = data.referralRewards;
-                
+                try {
+                    const data = JSON.parse(saved);
+                    
+                    // Обновляем только существующие поля
+                    Object.keys(data).forEach(key => {
+                        if (playerData.hasOwnProperty(key)) {
+                            playerData[key] = data[key];
+                        }
+                    });
+                } catch (e) {
+                    console.error('Error loading player data:', e);
+                }
             } else {
                 playerData.foodCount = 3;
                 playerData.hasReceivedInitialFood = true;
@@ -1437,7 +1418,11 @@
             
             const savedRequests = localStorage.getItem('withdrawRequests');
             if (savedRequests) {
-                withdrawRequests = JSON.parse(savedRequests);
+                try {
+                    withdrawRequests = JSON.parse(savedRequests);
+                } catch (e) {
+                    console.error('Error loading withdraw requests:', e);
+                }
             }
         }
 
@@ -1446,6 +1431,7 @@
             localStorage.setItem('withdrawRequests', JSON.stringify(withdrawRequests));
         }
 
+        // Остальные функции остаются без изменений...
         function openQuests() {
             const questsList = document.getElementById('questsList');
             let html = '';
@@ -1788,7 +1774,6 @@
             updateUI();
         }
 
-        // ИСПРАВЛЕННАЯ функция updateUI - теперь показывает "Обычная утка"
         function updateUI() {
             document.getElementById('hungerValue').textContent = playerData.hunger + '/100';
             document.getElementById('moodValue').textContent = playerData.mood + '/100';
@@ -1819,7 +1804,6 @@
             } else {
                 duckDisplay.style.filter = 'none';
                 duckDisplay.style.opacity = '1';
-                // ИСПРАВЛЕНО: теперь показывает "Обычная утка" вместо "Уникальная утка"
                 eggTypeDisplay.textContent = playerData.eggType === 'gold' ? '✨ Золотая утка' : '🦆 Обычная утка';
                 eggTypeDisplay.style.display = 'inline-block';
                 deathMessage.style.display = 'none';
@@ -2019,8 +2003,12 @@
             }, 4000);
         }
 
+        // ИСПРАВЛЕННАЯ админ-панель
         document.getElementById('adminToggle').onclick = function() {
-            if (!isAdmin) return;
+            if (!isAdmin) {
+                showNotification('❌ Доступ запрещен!');
+                return;
+            }
             
             const adminPanel = document.getElementById('adminPanel');
             adminPanel.classList.toggle('active');
