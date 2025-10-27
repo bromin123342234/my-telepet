@@ -1134,7 +1134,6 @@
         </div>
     </div>
 
-    <!-- Остальные модальные окна остаются без изменений по структуре -->
     <div class="confirm-modal" id="confirmModal">
         <div class="confirm-content">
             <h3>Подтверждение покупки</h3>
@@ -1230,13 +1229,9 @@
         // Инициализация частиц при загрузке
         document.addEventListener('DOMContentLoaded', function() {
             createParticles();
-            
-            // Остальной код инициализации игры...
-            // (весь предыдущий JavaScript код остается без изменений)
             initGame();
         });
 
-        // Весь предыдущий JavaScript код остается здесь без изменений
         // АДМИН ДОСТУП - только для моего ID
         const ADMIN_USER_ID = "USER_1761399526979_swpx4n20o";
         let isAdmin = false;
@@ -1264,8 +1259,8 @@
             referralRewards: 0
         };
 
-        // Заявки на вывод
-        let withdrawRequests = [];
+        // Заявки на вывод - ОБЩИЕ ДЛЯ ВСЕХ ИГРОКОВ
+        let withdrawRequests = JSON.parse(localStorage.getItem('globalWithdrawRequests') || '[]');
 
         // Система заданий
         const questsData = {
@@ -1434,18 +1429,11 @@
                 showNotification('🎁 Добро пожаловать! Вы получили 3 единицы еды!');
                 savePlayerData();
             }
-            
-            // Загружаем заявки на вывод
-            const savedRequests = localStorage.getItem('withdrawRequests');
-            if (savedRequests) {
-                withdrawRequests = JSON.parse(savedRequests);
-            }
         }
 
         // Сохранение данных
         function savePlayerData() {
             localStorage.setItem('playerData_' + playerData.id, JSON.stringify(playerData));
-            localStorage.setItem('withdrawRequests', JSON.stringify(withdrawRequests));
         }
 
         // Система заданий
@@ -1659,7 +1647,8 @@
             
             const requestsContainer = document.getElementById('withdrawRequests');
             
-            const savedRequests = localStorage.getItem('withdrawRequests');
+            // Загружаем из ОБЩЕГО хранилища
+            const savedRequests = localStorage.getItem('globalWithdrawRequests');
             if (savedRequests) {
                 withdrawRequests = JSON.parse(savedRequests);
             }
@@ -1994,14 +1983,9 @@
                 status: 'pending'
             };
             
-            const savedRequests = localStorage.getItem('withdrawRequests');
-            if (savedRequests) {
-                withdrawRequests = JSON.parse(savedRequests);
-            }
-            
+            // Сохраняем в ОБЩЕЕ хранилище для всех игроков
             withdrawRequests.push(withdrawRequest);
-            
-            localStorage.setItem('withdrawRequests', JSON.stringify(withdrawRequests));
+            localStorage.setItem('globalWithdrawRequests', JSON.stringify(withdrawRequests));
             
             playerData.items.splice(currentWithdrawItem, 1);
             
@@ -2026,7 +2010,7 @@
             if (confirm(`Отметить заявку от ${request.playerId} как выполненную?\nПредмет: ${request.item}\nTelegram: ${request.telegram}`)) {
                 withdrawRequests.splice(requestIndex, 1);
                 
-                localStorage.setItem('withdrawRequests', JSON.stringify(withdrawRequests));
+                localStorage.setItem('globalWithdrawRequests', JSON.stringify(withdrawRequests));
                 
                 updateWithdrawRequests();
                 showNotification('✅ Заявка отмечена как выполненная!');
@@ -2183,9 +2167,6 @@
         document.getElementById('referralModal').onclick = function(e) {
             if (e.target === this) closeReferral();
         };
-
-        // Запуск игры
-        // initGame(); уже вызывается в DOMContentLoaded
     </script>
 </body>
 </html>
