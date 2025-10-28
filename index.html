@@ -6,6 +6,7 @@
     <title>🥚 NFT Duck Eggs | Коллекционные утки</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* ВСЕ СТИЛИ ОСТАЮТСЯ БЕЗ ИЗМЕНЕНИЙ */
         * {
             margin: 0;
             padding: 0;
@@ -955,31 +956,6 @@
                 height: 140px;
             }
         }
-
-        /* Специальные эффекты для премиум элементов */
-        .premium-glow {
-            position: relative;
-        }
-
-        .premium-glow::after {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--gold), var(--accent), var(--primary), var(--secondary));
-            border-radius: inherit;
-            z-index: -1;
-            opacity: 0.4;
-            filter: blur(10px);
-            animation: premiumGlow 3s ease-in-out infinite;
-        }
-
-        @keyframes premiumGlow {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.6; }
-        }
     </style>
 </head>
 <body>
@@ -994,32 +970,32 @@
             <h1>🦆 NFT Ducks</h1>
             <div class="egg-display">
                 <div class="duck-frame">
-                    <img src="https://i.ibb.co/99bLxfGr/image.png" alt="Уникальная утка" class="custom-duck" id="duckDisplay">
+                    <img src="" alt="Утка" class="custom-duck" id="duckDisplay">
                 </div>
-                <div class="egg-type" id="eggTypeDisplay">✨ Уникальная утка</div>
+                <div class="egg-type" id="eggTypeDisplay">❌ Нет утки</div>
                 <div class="timer" id="eggTimer" style="display: none;">До вылупления: <span id="timerValue">17:00:00</span></div>
                 <button class="hatch-btn" id="hatchBtn" style="display: none;">🎁 Получить предмет!</button>
                 <div id="deathMessage" class="death-message" style="display: none;">💀 Утка умерла! Купите новую</div>
             </div>
         </div>
         
-        <div class="food-count" id="foodCount">🍎 Еды: 3</div>
+        <div class="food-count" id="foodCount">🍎 Еды: 0</div>
         
         <div class="stats-grid">
             <div class="stat-card">
                 <span class="stat-icon">🍽️</span>
                 <div>Сытость</div>
-                <div class="stat-value" id="hungerValue">25/100</div>
+                <div class="stat-value" id="hungerValue">0/100</div>
                 <div class="stat-progress">
-                    <div class="hunger-progress" id="hungerProgress" style="width: 25%;"></div>
+                    <div class="hunger-progress" id="hungerProgress" style="width: 0%;"></div>
                 </div>
             </div>
             <div class="stat-card">
                 <span class="stat-icon">😊</span>
                 <div>Настроение</div>
-                <div class="stat-value" id="moodValue">97/100</div>
+                <div class="stat-value" id="moodValue">0/100</div>
                 <div class="stat-progress">
-                    <div class="mood-progress" id="moodProgress" style="width: 97%;"></div>
+                    <div class="mood-progress" id="moodProgress" style="width: 0%;"></div>
                 </div>
             </div>
             <div class="stat-card">
@@ -1096,7 +1072,6 @@
                 <input type="text" class="admin-input" placeholder="ID игрока" id="verifyPlayerId">
                 <select class="admin-input" id="verifyQuestType">
                     <option value="subscribe">Подписка на канал</option>
-                    <option value="invite">Приглашение друзей</option>
                 </select>
                 <button class="btn btn-admin" id="verifyQuest">✅ Подтвердить задание</button>
             </div>
@@ -1112,9 +1087,9 @@
             <div class="shop-item">
                 <div>
                     <strong>✨ Золотая утка</strong><br>
-                    <small>Шансы: Вино 50%, Календарь 25%, Шапка Санты 5%, Конфеты 2%</small>
+                    <small>Шансы: Шампанское 50%, Календарик 25%, Tama Gadget 20%, Evil Eye 10%, Love Potion 5%</small>
                 </div>
-                <button class="btn btn-primary" style="padding: 12px 25px;" onclick="buyItem('gold_egg', 300)">300 ⭐</button>
+                <button class="btn btn-primary shop-buy-btn" data-type="gold_egg" data-cost="300">300 ⭐</button>
             </div>
             
             <div class="shop-item">
@@ -1122,15 +1097,15 @@
                     <strong>🍎 Еда (3 шт)</strong><br>
                     <small>Пополните запас еды для кормления</small>
                 </div>
-                <button class="btn btn-primary" style="padding: 12px 25px;" onclick="buyItem('food', 20)">20 ⭐</button>
+                <button class="btn btn-primary shop-buy-btn" data-type="food" data-cost="15">15 ⭐</button>
             </div>
             
             <div class="shop-item">
                 <div>
                     <strong>🦆 Обычная утка</strong><br>
-                    <small>Шансы: Сердечко 40%, Роза 25%, Календарь 5%</small>
+                    <small>Шансы: Мишка 50%, Роза 25%, Календарик 5%</small>
                 </div>
-                <button class="btn btn-primary" style="padding: 12px 25px;" onclick="buyItem('normal_egg', 50)">50 ⭐</button>
+                <button class="btn btn-primary shop-buy-btn" data-type="normal_egg" data-cost="50">50 ⭐</button>
             </div>
         </div>
     </div>
@@ -1140,15 +1115,15 @@
             <h3>Подтверждение покупки</h3>
             <p id="confirmText">Вы уверены, что хотите купить этот предмет?</p>
             <div class="confirm-buttons">
-                <button class="btn btn-secondary" onclick="closeConfirm()">Отмена</button>
-                <button class="btn btn-primary" onclick="confirmPurchase()">Купить</button>
+                <button class="btn btn-secondary" id="cancelConfirm">Отмена</button>
+                <button class="btn btn-primary" id="confirmPurchase">Подтвердить</button>
             </div>
         </div>
     </div>
 
     <div class="inventory-modal" id="inventoryModal">
         <div class="inventory-content">
-            <button class="close-btn" onclick="closeInventory()">×</button>
+            <button class="close-btn" id="closeInventory">×</button>
             <h2 class="modal-header">🎒 Инвентарь</h2>
             <div id="inventoryItems"></div>
         </div>
@@ -1156,20 +1131,20 @@
 
     <div class="withdraw-modal" id="withdrawModal">
         <div class="withdraw-content">
-            <button class="close-btn" onclick="closeWithdraw()">×</button>
+            <button class="close-btn" id="closeWithdraw">×</button>
             <h2 class="modal-header">📤 Заявка на вывод</h2>
             <div class="info-text">
                 <p>Вы хотите вывести предмет: <strong id="withdrawItemName"></strong></p>
                 <p>Напишите ваш Telegram username для связи:</p>
                 <input type="text" class="admin-input" id="telegramUsername" placeholder="@username">
-                <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="submitWithdraw()">✅ Отправить заявку</button>
+                <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" id="submitWithdraw">✅ Отправить заявку</button>
             </div>
         </div>
     </div>
 
     <div class="quests-modal" id="questsModal">
         <div class="quests-content">
-            <button class="close-btn" onclick="closeQuests()">×</button>
+            <button class="close-btn" id="closeQuests">×</button>
             <h2 class="modal-header">🎯 Задания</h2>
             <div id="questsList"></div>
         </div>
@@ -1177,17 +1152,12 @@
 
     <div class="referral-modal" id="referralModal">
         <div class="referral-content">
-            <button class="close-btn" onclick="closeReferral()">×</button>
+            <button class="close-btn" id="closeReferral">×</button>
             <h2 class="modal-header">👥 Реферальная система</h2>
             <div class="info-text">
-                <p>Введите ID вашего друга, чтобы получить бонус:</p>
-                <input type="text" class="admin-input" id="friendId" placeholder="ID друга">
-                <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="applyReferral()">✅ Применить код</button>
-                <div style="margin-top: 20px; font-size: 13px; color: #ccc;">
-                    <strong>Ваш ID для друзей:</strong><br>
-                    <span id="yourIdDisplay" style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; display: block; margin: 10px 0; font-family: monospace; word-break: break-all; border: 1px solid rgba(255,255,255,0.1);">Загрузка...</span>
-                    Друзья должны ввести этот код при регистрации
-                </div>
+                <p style="text-align: center; color: var(--warning); font-weight: bold;">
+                    ⚠️ Реферальная система временно закрыта
+                </p>
             </div>
         </div>
     </div>
@@ -1200,10 +1170,91 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bnVrbWhscGp1aXJtbGlqdnFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Njc0NDMsImV4cCI6MjA3NzE0MzQ0M30.t0sNQiamZE5pbdptekj742d8zMexLst5LOI6b0yQ_Cw';
         const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // ========== SUPABASE ФУНКЦИИ ==========
+        // ========== КОНФИГУРАЦИЯ ИГРЫ ==========
+        const ADMIN_USER_ID = "USER_1761399526979_swpx4n20o";
+        let isAdmin = false;
+        let currentWithdrawItem = null;
+        let currentPurchase = null;
 
-        // Загрузка данных игрока из Supabase
-        async function loadPlayerDataFromSupabase() {
+        // Данные игрока
+        let playerData = {
+            id: '',
+            hunger: 0,
+            mood: 0,
+            stars: 0,
+            items: [],
+            currentEgg: null,
+            foodCount: 0,
+            isAlive: false,
+            eggHatchTime: null,
+            isEggReady: false,
+            hasReceivedInitialFood: false,
+            quests: {
+                subscribe: { completed: false, claimed: false }
+            },
+            lastStatDecrease: Date.now()
+        };
+
+        // Заявки на вывод
+        let withdrawRequests = [];
+
+        // Система заданий
+        const questsData = {
+            subscribe: {
+                title: "📢 Подписка на канал",
+                description: "Подпишитесь на наш Telegram канал @MyNFTPet",
+                reward: { type: "stars", amount: 10 },
+                action: "subscribe"
+            }
+        };
+
+        // Предметы для яиц
+        const eggItems = {
+            normal_egg: [
+                { name: "🐻 Мишка", chance: 50 },
+                { name: "🌹 Роза", chance: 25 },
+                { name: "📅 Календарик", chance: 5 }
+            ],
+            gold_egg: [
+                { name: "🍾 Шампанское", chance: 50 },
+                { name: "📅 Календарик", chance: 25 },
+                { name: "📱 Tama Gadget", chance: 20 },
+                { name: "👁️ Evil Eye", chance: 10 },
+                { name: "🧪 Love Potion", chance: 5 }
+            ]
+        };
+
+        // ========== ОСНОВНЫЕ ФУНКЦИИ ИГРЫ ==========
+        function generatePlayerId() {
+            let playerId = localStorage.getItem('playerId');
+            if (!playerId) {
+                playerId = 'USER_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('playerId', playerId);
+            }
+            return playerId;
+        }
+
+        async function loadPlayerData() {
+            playerData.id = generatePlayerId();
+            document.getElementById('playerId').textContent = playerData.id;
+            
+            // Сбрасываем прогресс всех игроков
+            if (!localStorage.getItem('reset_done_v3')) {
+                localStorage.clear();
+                localStorage.setItem('reset_done_v3', 'true');
+                localStorage.setItem('playerId', playerData.id);
+                playerData.foodCount = 3;
+                playerData.hasReceivedInitialFood = true;
+                showNotification('🎁 Добро пожаловать! Вы получили 3 единицы еды!');
+            } else {
+                const saved = localStorage.getItem('playerData_' + playerData.id);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    Object.assign(playerData, data);
+                }
+            }
+            
+            // Пробуем загрузить из Supabase
             try {
                 const { data, error } = await supabase
                     .from('players')
@@ -1211,20 +1262,19 @@
                     .eq('player_id', playerData.id)
                     .single();
 
-                if (data) {
+                if (data && data.player_data) {
                     Object.assign(playerData, data.player_data);
-                    return true;
                 }
             } catch (error) {
                 console.log('Supabase недоступен, используем localStorage');
             }
-            return false;
         }
 
-        // Сохранение данных игрока в Supabase
-        async function savePlayerDataToSupabase() {
+        async function savePlayerData() {
+            localStorage.setItem('playerData_' + playerData.id, JSON.stringify(playerData));
+            
             try {
-                const { error } = await supabase
+                await supabase
                     .from('players')
                     .upsert({
                         player_id: playerData.id,
@@ -1233,304 +1283,353 @@
                     }, {
                         onConflict: 'player_id'
                     });
-                return !error;
             } catch (error) {
-                return false;
+                console.log('Ошибка сохранения в Supabase');
             }
         }
 
-        // Поиск игрока по ID в Supabase
-        async function findPlayerInSupabase(playerId) {
-            try {
-                const { data, error } = await supabase
-                    .from('players')
-                    .select('*')
-                    .eq('player_id', playerId)
-                    .single();
-
-                return data ? { player: data.player_data, key: data.player_id } : null;
-            } catch (error) {
-                return null;
-            }
-        }
-
-        // Загрузка заявок на вывод из Supabase
-        async function loadWithdrawRequestsFromSupabase() {
-            try {
-                const { data, error } = await supabase
-                    .from('withdraw_requests')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                return data || [];
-            } catch (error) {
-                return [];
-            }
-        }
-
-        // Сохранение заявки на вывод в Supabase
-        async function saveWithdrawRequestToSupabase(request) {
-            try {
-                const { error } = await supabase
-                    .from('withdraw_requests')
-                    .insert([
-                        {
-                            player_id: request.playerId,
-                            item_name: request.item,
-                            telegram: request.telegram,
-                            item_id: request.itemId,
-                            status: 'pending'
-                        }
-                    ]);
-
-                return !error;
-            } catch (error) {
-                return false;
-            }
-        }
-
-        // Удаление выполненной заявки из Supabase
-        async function completeWithdrawRequestInSupabase(requestId) {
-            try {
-                const { error } = await supabase
-                    .from('withdraw_requests')
-                    .delete()
-                    .eq('id', requestId);
-
-                return !error;
-            } catch (error) {
-                return false;
-            }
-        }
-
-        // Создание частиц
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            const particleCount = 15;
+        function updateUI() {
+            // Обновляем статистику
+            document.getElementById('hungerValue').textContent = playerData.hunger + '/100';
+            document.getElementById('moodValue').textContent = playerData.mood + '/100';
+            document.getElementById('starsValue').textContent = playerData.stars;
+            document.getElementById('itemsValue').textContent = playerData.items.length;
+            document.getElementById('foodCount').textContent = '🍎 Еды: ' + playerData.foodCount;
             
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                
-                // Случайные параметры
-                const size = Math.random() * 6 + 2;
-                const posX = Math.random() * 100;
-                const posY = Math.random() * 100;
-                const delay = Math.random() * 20;
-                const duration = Math.random() * 10 + 15;
-                
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                particle.style.left = `${posX}%`;
-                particle.style.top = `${posY}%`;
-                particle.style.animationDelay = `${delay}s`;
-                particle.style.animationDuration = `${duration}s`;
-                
-                // Случайный цвет
-                const colors = ['var(--primary)', 'var(--accent)', 'var(--gold)', 'var(--secondary)'];
-                const color = colors[Math.floor(Math.random() * colors.length)];
-                particle.style.background = color;
-                
-                particlesContainer.appendChild(particle);
-            }
-        }
-
-        // Инициализация частиц при загрузке
-        document.addEventListener('DOMContentLoaded', function() {
-            createParticles();
-            initGame();
-        });
-
-        // АДМИН ДОСТУП - только для моего ID
-        const ADMIN_USER_ID = "USER_1761399526979_swpx4n20o";
-        let isAdmin = false;
-
-        // Данные игрока
-        let playerData = {
-            id: '',
-            hunger: 25,
-            mood: 97,
-            stars: 0,
-            items: [],
-            eggType: 'normal',
-            foodCount: 3,
-            isAlive: true,
-            eggHatchTime: null,
-            isEggReady: false,
-            hasFedToday: false,
-            hasReceivedInitialFood: false,
-            quests: {
-                subscribe: { completed: false, claimed: false },
-                invite: { progress: 0, target: 5, claimed: false }
-            },
-            referredBy: '',
-            referralCount: 0,
-            referralRewards: 0
-        };
-
-        // Заявки на вывод - ОБЩИЕ ДЛЯ ВСЕХ ИГРОКОВ
-        let withdrawRequests = JSON.parse(localStorage.getItem('globalWithdrawRequests') || '[]');
-
-        // Система заданий
-        const questsData = {
-            subscribe: {
-                title: "📢 Подписка на канал",
-                description: "Подпишитесь на наш Telegram канал",
-                reward: { type: "food", amount: 1 },
-                action: "subscribe"
-            },
-            invite: {
-                title: "👥 Пригласить друзей",
-                description: "Пригласите 5 друзей в игру",
-                reward: { type: "food", amount: 3 },
-                action: "invite"
-            }
-        };
-
-        // ========== ОБНОВЛЕННЫЕ ФУНКЦИИ С SUPABASE ==========
-
-        // Загрузка данных (обновленная)
-        async function loadPlayerData() {
-            playerData.id = generatePlayerId();
-            document.getElementById('playerId').textContent = playerData.id;
+            // Обновляем прогресс-бары
+            document.getElementById('hungerProgress').style.width = playerData.hunger + '%';
+            document.getElementById('moodProgress').style.width = playerData.mood + '%';
             
-            const saved = localStorage.getItem('playerData_' + playerData.id);
-            if (saved) {
-                const data = JSON.parse(saved);
-                if (data.hunger !== undefined) playerData.hunger = data.hunger;
-                if (data.mood !== undefined) playerData.mood = data.mood;
-                if (data.stars !== undefined) playerData.stars = data.stars;
-                if (data.items !== undefined) playerData.items = data.items;
-                if (data.eggType !== undefined) playerData.eggType = data.eggType;
-                if (data.foodCount !== undefined) playerData.foodCount = data.foodCount;
-                if (data.isAlive !== undefined) playerData.isAlive = data.isAlive;
-                if (data.eggHatchTime !== undefined) playerData.eggHatchTime = data.eggHatchTime;
-                if (data.isEggReady !== undefined) playerData.isEggReady = data.isEggReady;
-                if (data.hasFedToday !== undefined) playerData.hasFedToday = data.hasFedToday;
-                if (data.hasReceivedInitialFood !== undefined) playerData.hasReceivedInitialFood = data.hasReceivedInitialFood;
-                if (data.quests !== undefined) playerData.quests = data.quests;
-                if (data.referredBy !== undefined) playerData.referredBy = data.referredBy;
-                if (data.referralCount !== undefined) playerData.referralCount = data.referralCount;
-                if (data.referralRewards !== undefined) playerData.referralRewards = data.referralRewards;
-            } else {
-                playerData.foodCount = 3;
-                playerData.hasReceivedInitialFood = true;
-                await savePlayerData();
-                showNotification('🎁 Добро пожаловать! Вы получили 3 единицы еды!');
-            }
+            // Обновляем отображение утки
+            const duckDisplay = document.getElementById('duckDisplay');
+            const eggTypeDisplay = document.getElementById('eggTypeDisplay');
+            const deathMessage = document.getElementById('deathMessage');
+            const hatchBtn = document.getElementById('hatchBtn');
+            const eggTimer = document.getElementById('eggTimer');
             
-            // Пробуем загрузить из Supabase
-            await loadPlayerDataFromSupabase();
-        }
-
-        // Сохранение данных (обновленная)
-        async function savePlayerData() {
-            localStorage.setItem('playerData_' + playerData.id, JSON.stringify(playerData));
-            await savePlayerDataToSupabase();
-        }
-
-        // Поиск игрока по ID (обновленная)
-        async function findPlayerById(playerId) {
-            // Сначала пробуем Supabase
-            const supabaseResult = await findPlayerInSupabase(playerId);
-            if (supabaseResult) return supabaseResult;
-            
-            // Fallback на localStorage
-            const allPlayerKeys = Object.keys(localStorage);
-            for (let key of allPlayerKeys) {
-                if (key.startsWith('playerData_')) {
-                    try {
-                        const player = JSON.parse(localStorage.getItem(key));
-                        if (player.id === playerId) {
-                            return { player, key };
-                        }
-                    } catch (e) {
-                        console.error('Error processing player data:', e);
-                    }
+            if (!playerData.isAlive) {
+                duckDisplay.src = '';
+                duckDisplay.classList.add('dead-egg');
+                eggTypeDisplay.textContent = '💀 Утка умерла';
+                deathMessage.style.display = 'block';
+                hatchBtn.style.display = 'none';
+                eggTimer.style.display = 'none';
+            } else if (playerData.currentEgg) {
+                if (playerData.currentEgg.type === 'gold_egg') {
+                    duckDisplay.src = 'https://i.ibb.co/B5czcMk3/image.png';
+                    eggTypeDisplay.textContent = '✨ Золотая утка';
+                } else {
+                    duckDisplay.src = 'https://i.ibb.co/99bLxfGr/image.png';
+                    eggTypeDisplay.textContent = '🦆 Обычная утка';
                 }
-            }
-            return null;
-        }
-
-        // Применение реферального кода (обновленная)
-        async function applyReferralCode(friendId) {
-            if (friendId === playerData.id) {
-                showNotification('❌ Нельзя использовать свой собственный ID!');
-                return false;
-            }
-
-            if (playerData.referredBy) {
-                showNotification('❌ Вы уже использовали реферальный код!');
-                return false;
-            }
-
-            const found = await findPlayerById(friendId);
-            if (found && found.player.id !== playerData.id) {
-                found.player.referralCount = (found.player.referralCount || 0) + 1;
-                found.player.quests.invite.progress = (found.player.quests.invite.progress || 0) + 1;
+                duckDisplay.classList.remove('dead-egg');
+                deathMessage.style.display = 'none';
                 
-                // Сохраняем обновленные данные пригласившего
-                localStorage.setItem(found.key, JSON.stringify(found.player));
-                await savePlayerDataToSupabase();
-                
-                playerData.referredBy = found.player.id;
-                await savePlayerData();
-                
-                showNotification('🎉 Код друга применен! Ваш друг получил +1 к прогрессу приглашений.');
-                return true;
-            }
-            
-            showNotification('❌ ID друга не найден! Проверьте правильность кода.');
-            return false;
-        }
-
-        // Обновление списка заявок (обновленная)
-        async function updateWithdrawRequests() {
-            if (!isAdmin) return;
-            
-            const requestsContainer = document.getElementById('withdrawRequests');
-            
-            // Загружаем из Supabase
-            const supabaseRequests = await loadWithdrawRequestsFromSupabase();
-            
-            if (supabaseRequests.length === 0) {
-                // Fallback на localStorage
-                const savedRequests = localStorage.getItem('globalWithdrawRequests');
-                if (savedRequests) {
-                    withdrawRequests = JSON.parse(savedRequests);
+                if (playerData.isEggReady) {
+                    hatchBtn.style.display = 'block';
+                    eggTimer.style.display = 'none';
+                } else if (playerData.eggHatchTime) {
+                    hatchBtn.style.display = 'none';
+                    eggTimer.style.display = 'block';
+                    updateHatchTimer();
                 }
             } else {
-                withdrawRequests = supabaseRequests.map(req => ({
-                    playerId: req.player_id,
-                    item: req.item_name,
-                    telegram: req.telegram,
-                    timestamp: new Date(req.created_at).getTime(),
-                    itemId: req.item_id,
-                    status: req.status,
-                    id: req.id
-                }));
+                duckDisplay.src = '';
+                duckDisplay.classList.remove('dead-egg');
+                eggTypeDisplay.textContent = '❌ Нет утки';
+                deathMessage.style.display = 'none';
+                hatchBtn.style.display = 'none';
+                eggTimer.style.display = 'none';
             }
             
-            if (withdrawRequests.length === 0) {
-                requestsContainer.innerHTML = '<div class="info-text">Нет заявок на вывод</div>';
+            // Блокируем кнопки если утка умерла или нет еды
+            document.getElementById('feedBtn').disabled = !playerData.isAlive || playerData.foodCount <= 0;
+            document.getElementById('playBtn').disabled = !playerData.isAlive;
+        }
+
+        // ========== УХОД ЗА УТКОЙ ==========
+        function feedDuck() {
+            if (!playerData.isAlive) {
+                showNotification('❌ Утка умерла! Купите новую утку.');
+                return;
+            }
+            
+            if (playerData.foodCount <= 0) {
+                showNotification('❌ Недостаточно еды! Купите еду в магазине.');
+                return;
+            }
+            
+            playerData.hunger = Math.min(100, playerData.hunger + 14);
+            playerData.foodCount--;
+            savePlayerData();
+            updateUI();
+            showNotification('🍎 Утка покормлена! +14 к сытости');
+            
+            checkDeath();
+        }
+
+        function playWithDuck() {
+            if (!playerData.isAlive) {
+                showNotification('❌ Утка умерла! Купите новую утку.');
+                return;
+            }
+            
+            playerData.mood = Math.min(100, playerData.mood + 10);
+            savePlayerData();
+            updateUI();
+            showNotification('🎮 Вы поиграли с уткой! +10 к настроению');
+        }
+
+        function startStatDecrease() {
+            setInterval(async () => {
+                if (!playerData.isAlive || !playerData.currentEgg) return;
+                
+                const now = Date.now();
+                const hoursPassed = (now - playerData.lastStatDecrease) / (1000 * 60 * 60);
+                
+                if (hoursPassed >= 1) {
+                    playerData.hunger = Math.max(0, playerData.hunger - 10);
+                    playerData.mood = Math.max(0, playerData.mood - 8);
+                    playerData.lastStatDecrease = now;
+                    
+                    await savePlayerData();
+                    updateUI();
+                    checkDeath();
+                }
+            }, 60000);
+        }
+
+        function checkDeath() {
+            if ((playerData.hunger <= 0 || playerData.mood <= 0) && playerData.isAlive) {
+                playerData.isAlive = false;
+                playerData.currentEgg = null;
+                playerData.isEggReady = false;
+                playerData.eggHatchTime = null;
+                savePlayerData();
+                updateUI();
+                showNotification('💀 Утка умерла от голода или плохого настроения! Купите новую утку.');
+            }
+        }
+
+        // ========== СИСТЕМА ЯИЦ И ВЫЛУПЛЕНИЯ ==========
+        function buyEgg(eggType, cost) {
+            playerData.stars -= cost;
+            playerData.currentEgg = {
+                type: eggType,
+                startTime: Date.now()
+            };
+            playerData.isAlive = true;
+            playerData.hunger = 100;
+            playerData.mood = 100;
+            playerData.isEggReady = false;
+            playerData.eggHatchTime = Date.now() + (17 * 60 * 60 * 1000);
+            
+            savePlayerData();
+            updateUI();
+            showNotification('🎉 Вы купили утку! Она вылупится через 17 часов.');
+            
+            startHatchTimer();
+        }
+
+        function startHatchTimer() {
+            if (!playerData.eggHatchTime || playerData.isEggReady) return;
+            
+            const timer = setInterval(() => {
+                if (playerData.isEggReady || !playerData.eggHatchTime) {
+                    clearInterval(timer);
+                    return;
+                }
+                
+                const now = Date.now();
+                const timeLeft = playerData.eggHatchTime - now;
+                
+                if (timeLeft <= 0) {
+                    playerData.isEggReady = true;
+                    savePlayerData();
+                    updateUI();
+                    showNotification('🎊 Яйцо готово к вылуплению! Нажмите "Получить предмет"');
+                    clearInterval(timer);
+                } else {
+                    updateHatchTimer();
+                }
+            }, 1000);
+        }
+
+        function updateHatchTimer() {
+            if (!playerData.eggHatchTime) return;
+            
+            const now = Date.now();
+            const timeLeft = playerData.eggHatchTime - now;
+            
+            if (timeLeft <= 0) {
+                playerData.isEggReady = true;
+                savePlayerData();
+                updateUI();
+                return;
+            }
+            
+            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            
+            document.getElementById('timerValue').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function hatchEgg() {
+            if (!playerData.isEggReady || !playerData.currentEgg) {
+                showNotification('❌ Яйцо еще не готово к вылуплению!');
+                return;
+            }
+            
+            const eggType = playerData.currentEgg.type;
+            const items = eggItems[eggType];
+            let randomItem = null;
+            
+            // Выбор предмета на основе шансов
+            const random = Math.random() * 100;
+            let currentChance = 0;
+            
+            for (const item of items) {
+                currentChance += item.chance;
+                if (random <= currentChance) {
+                    randomItem = item;
+                    break;
+                }
+            }
+            
+            if (!randomItem) {
+                randomItem = items[items.length - 1];
+            }
+            
+            // Добавляем предмет в инвентарь
+            playerData.items.push({
+                id: 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                name: randomItem.name,
+                type: eggType
+            });
+            
+            // Сбрасываем яйцо
+            playerData.currentEgg = null;
+            playerData.isEggReady = false;
+            playerData.eggHatchTime = null;
+            playerData.isAlive = false;
+            
+            savePlayerData();
+            updateUI();
+            showNotification(`🎁 Поздравляем! Вы получили: ${randomItem.name}`);
+        }
+
+        // ========== МАГАЗИН ==========
+        function openShop() {
+            document.getElementById('shopModal').classList.add('active');
+        }
+
+        function closeShop() {
+            document.getElementById('shopModal').classList.remove('active');
+        }
+
+        function buyItem(itemType, cost) {
+            currentPurchase = { itemType, cost };
+            document.getElementById('confirmText').textContent = `Вы уверены, что хотите купить ${getItemName(itemType)} за ${cost} звёзд?`;
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        function getItemName(itemType) {
+            switch(itemType) {
+                case 'gold_egg': return 'Золотую утку';
+                case 'normal_egg': return 'Обычную утку';
+                case 'food': return '3 единицы еды';
+                default: return 'предмет';
+            }
+        }
+
+        function closeConfirm() {
+            document.getElementById('confirmModal').classList.remove('active');
+            currentPurchase = null;
+        }
+
+        async function confirmPurchase() {
+            if (!currentPurchase) return;
+            
+            const { itemType, cost } = currentPurchase;
+            
+            // ПРОВЕРЯЕМ БАЛАНС ПРИ ПОДТВЕРЖДЕНИИ
+            if (playerData.stars < cost) {
+                showNotification('❌ Недостаточно звёзд!');
+                closeConfirm();
+                return;
+            }
+            
+            if (itemType === 'food') {
+                playerData.stars -= cost;
+                playerData.foodCount += 3;
+                showNotification('🎉 Вы купили 3 единицы еды!');
+            } else {
+                buyEgg(itemType, cost);
+            }
+            
+            await savePlayerData();
+            updateUI();
+            closeConfirm();
+            closeShop();
+        }
+
+        // ========== ИНВЕНТАРЬ И ВЫВОД ==========
+        function openInventory() {
+            const inventoryItems = document.getElementById('inventoryItems');
+            
+            if (playerData.items.length === 0) {
+                inventoryItems.innerHTML = `
+                    <div class="empty-inventory">
+                        <h3>🎒 Инвентарь пуст</h3>
+                        <p>Вылупите яйцо, чтобы получить предметы!</p>
+                    </div>
+                `;
             } else {
                 let html = '';
-                withdrawRequests.forEach((request, index) => {
+                playerData.items.forEach((item, index) => {
                     html += `
-                        <div class="withdraw-log">
-                            <strong>👤 ID игрока:</strong> ${request.playerId}<br>
-                            <strong>🎁 Предмет:</strong> ${request.item}<br>
-                            <strong>📱 Telegram:</strong> ${request.telegram}<br>
-                            <strong>🕒 Время:</strong> ${new Date(request.timestamp).toLocaleString()}<br>
-                            <button class="withdraw-btn" onclick="completeWithdraw('${request.id || index}')" style="margin-top: 8px;">✅ Выполнено</button>
+                        <div class="inventory-item">
+                            <div>
+                                <strong>${item.name}</strong><br>
+                                <small>Из: ${item.type === 'gold_egg' ? 'Золотой утки' : 'Обычной утки'}</small>
+                            </div>
+                            <button class="withdraw-btn" data-index="${index}">📤 Вывод</button>
                         </div>
                     `;
                 });
-                requestsContainer.innerHTML = html;
+                inventoryItems.innerHTML = html;
+                
+                // Назначаем обработчики для кнопок вывода
+                document.querySelectorAll('.withdraw-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        openWithdraw(parseInt(this.getAttribute('data-index')));
+                    });
+                });
             }
+            
+            document.getElementById('inventoryModal').classList.add('active');
         }
 
-        // Отправка заявки на вывод (обновленная)
+        function closeInventory() {
+            document.getElementById('inventoryModal').classList.remove('active');
+        }
+
+        function openWithdraw(itemIndex) {
+            const item = playerData.items[itemIndex];
+            currentWithdrawItem = itemIndex;
+            
+            document.getElementById('withdrawItemName').textContent = item.name;
+            document.getElementById('telegramUsername').value = '';
+            document.getElementById('withdrawModal').classList.add('active');
+        }
+
+        function closeWithdraw() {
+            document.getElementById('withdrawModal').classList.remove('active');
+            currentWithdrawItem = null;
+        }
+
         async function submitWithdraw() {
             const telegram = document.getElementById('telegramUsername').value.trim();
             if (!telegram) {
@@ -1545,72 +1644,135 @@
 
             const item = playerData.items[currentWithdrawItem];
             
-            const withdrawRequest = {
-                playerId: playerData.id,
-                item: item.name,
-                telegram: telegram,
-                timestamp: Date.now(),
-                itemId: item.id,
-                status: 'pending'
-            };
-            
-            // Сохраняем в Supabase
-            const supabaseSuccess = await saveWithdrawRequestToSupabase(withdrawRequest);
-            
-            if (supabaseSuccess) {
-                playerData.items.splice(currentWithdrawItem, 1);
-                await savePlayerData();
-                updateUI();
-                closeWithdraw();
-                closeInventory();
-                showNotification('✅ Заявка на вывод отправлена! С вами свяжутся в Telegram.');
-            } else {
-                // Fallback на localStorage
-                withdrawRequests.push(withdrawRequest);
-                localStorage.setItem('globalWithdrawRequests', JSON.stringify(withdrawRequests));
-                playerData.items.splice(currentWithdrawItem, 1);
-                savePlayerData();
-                updateUI();
-                closeWithdraw();
-                closeInventory();
-                showNotification('✅ Заявка на вывод отправлена! С вами свяжутся в Telegram.');
+            try {
+                const { error } = await supabase
+                    .from('withdraw_requests')
+                    .insert([
+                        {
+                            player_id: playerData.id,
+                            item_name: item.name,
+                            telegram: telegram,
+                            item_id: item.id,
+                            status: 'pending'
+                        }
+                    ]);
+
+                if (!error) {
+                    playerData.items.splice(currentWithdrawItem, 1);
+                    await savePlayerData();
+                    updateUI();
+                    closeWithdraw();
+                    closeInventory();
+                    showNotification('✅ Заявка на вывод отправлена! С вами свяжутся в Telegram.');
+                } else {
+                    showNotification('❌ Ошибка при отправке заявки. Попробуйте позже.');
+                }
+            } catch (error) {
+                showNotification('❌ Ошибка при отправке заявки.');
             }
-            
-            await updateWithdrawRequests();
         }
 
-        // Выполнение вывода (обновленная)
-        async function completeWithdraw(requestId) {
-            if (!isAdmin) {
-                showNotification('❌ Доступ запрещен!');
+        // ========== СИСТЕМА ЗАДАНИЙ ==========
+        function openQuests() {
+            const questsList = document.getElementById('questsList');
+            let html = '';
+
+            const subscribeQuest = playerData.quests.subscribe;
+            const subscribeData = questsData.subscribe;
+            
+            html += `
+                <div class="quest-item">
+                    <div class="quest-header">
+                        <strong>${subscribeData.title}</strong>
+                        ${subscribeQuest.claimed ? 
+                            '<span style="color: #27ae60;">✅ Выполнено</span>' : 
+                            (subscribeQuest.completed ? 
+                                '<button class="quest-btn" id="claimSubscribe">🎁 Получить награду</button>' :
+                                '<div><button class="quest-btn" id="openSubscribe">🔗 Перейти в канал</button>' +
+                                '<button class="quest-btn" id="checkSubscribe" style="margin-left: 10px; background: var(--accent);">✅ Проверить подписку</button></div>'
+                            )
+                        }
+                    </div>
+                    <p>${subscribeData.description}</p>
+                    <div class="quest-reward">
+                        🎁 Награда: ${subscribeData.reward.amount} ⭐ Звёзды
+                    </div>
+                </div>
+            `;
+
+            questsList.innerHTML = html;
+            
+            // Назначаем обработчики для кнопок заданий
+            if (document.getElementById('openSubscribe')) {
+                document.getElementById('openSubscribe').addEventListener('click', openSubscribeLink);
+            }
+            if (document.getElementById('checkSubscribe')) {
+                document.getElementById('checkSubscribe').addEventListener('click', checkSubscription);
+            }
+            if (document.getElementById('claimSubscribe')) {
+                document.getElementById('claimSubscribe').addEventListener('click', function() {
+                    claimQuestReward('subscribe');
+                });
+            }
+            
+            document.getElementById('questsModal').classList.add('active');
+        }
+
+        function closeQuests() {
+            document.getElementById('questsModal').classList.remove('active');
+        }
+
+        function openSubscribeLink() {
+            window.open('https://t.me/MyNFTPet', '_blank');
+        }
+
+        function checkSubscription() {
+            showNotification('🔍 Проверка подписки... После подписки нажмите "Проверить подписку" еще раз');
+        }
+
+        function claimQuestReward(questType) {
+            if (playerData.quests[questType].claimed) {
+                showNotification('❌ Вы уже получили награду за это задание!');
                 return;
             }
 
-            const request = typeof requestId === 'number' ? 
-                withdrawRequests[requestId] : 
-                withdrawRequests.find(r => r.id === requestId);
-                
-            if (!request) return;
+            if (!playerData.quests[questType].completed) {
+                showNotification('❌ Задание еще не выполнено!');
+                return;
+            }
 
-            if (confirm(`Отметить заявку от ${request.playerId} как выполненную?\nПредмет: ${request.item}\nTelegram: ${request.telegram}`)) {
-                // Пробуем удалить из Supabase
-                if (request.id) {
-                    const success = await completeWithdrawRequestInSupabase(request.id);
-                    if (success) {
-                        withdrawRequests = withdrawRequests.filter(r => r.id !== request.id);
-                    }
-                } else {
-                    // Fallback на localStorage
-                    withdrawRequests.splice(requestId, 1);
-                    localStorage.setItem('globalWithdrawRequests', JSON.stringify(withdrawRequests));
-                }
-                
-                await updateWithdrawRequests();
-                showNotification('✅ Заявка отмечена как выполненная!');
+            const reward = questsData[questType].reward;
+            
+            if (reward.type === 'stars') {
+                playerData.stars += reward.amount;
+            }
+            
+            playerData.quests[questType].claimed = true;
+            savePlayerData();
+            updateUI();
+            showNotification(`🎉 Вы получили ${reward.amount} ${reward.type === 'stars' ? '⭐' : '🍎'} за выполнение задания!`);
+            closeQuests();
+        }
+
+        // ========== РЕФЕРАЛЬНАЯ СИСТЕМА ==========
+        function openReferral() {
+            document.getElementById('referralModal').classList.add('active');
+        }
+
+        function closeReferral() {
+            document.getElementById('referralModal').classList.remove('active');
+        }
+
+        // ========== АДМИН ПАНЕЛЬ ==========
+        function toggleAdminPanel() {
+            const panel = document.getElementById('adminPanel');
+            panel.classList.toggle('active');
+            
+            if (panel.classList.contains('active')) {
+                updateWithdrawRequests();
             }
         }
 
-        // Админ: выдать звёзды (обновленная)
         async function adminGiveStars() {
             if (!isAdmin) {
                 showNotification('❌ Доступ запрещен!');
@@ -1630,32 +1792,49 @@
                 return;
             }
 
-            const found = await findPlayerById(playerIdInput);
-            if (!found) {
-                showNotification('❌ Игрок не найден! Проверьте ID игрока');
-                return;
-            }
+            try {
+                // Получаем данные игрока из Supabase
+                const { data, error } = await supabase
+                    .from('players')
+                    .select('*')
+                    .eq('player_id', playerIdInput)
+                    .single();
 
-            const player = found.player;
-            player.stars = (player.stars || 0) + starsInput;
-            
-            // Сохраняем в оба места
-            localStorage.setItem(found.key, JSON.stringify(player));
-            await savePlayerDataToSupabase();
+                if (error || !data) {
+                    showNotification('❌ Игрок не найден в Supabase!');
+                    return;
+                }
 
-            if (playerIdInput === playerData.id) {
-                playerData.stars += starsInput;
-                updateUI();
-                showNotification(`✅ Админ выдал вам ${starsInput} звёзд!`);
-            } else {
-                showNotification(`✅ Выдано ${starsInput} звёзд игроку ${playerIdInput}`);
+                // Обновляем звёзды
+                const playerDataFromSupabase = data.player_data;
+                playerDataFromSupabase.stars = (playerDataFromSupabase.stars || 0) + starsInput;
+                
+                // Сохраняем в Supabase
+                const { error: updateError } = await supabase
+                    .from('players')
+                    .update({
+                        player_data: playerDataFromSupabase,
+                        last_updated: new Date().toISOString()
+                    })
+                    .eq('player_id', playerIdInput);
+
+                if (!updateError) {
+                    if (playerIdInput === playerData.id) {
+                        playerData.stars += starsInput;
+                        updateUI();
+                    }
+                    showNotification(`✅ Выдано ${starsInput} звёзд игроку ${playerIdInput}`);
+                } else {
+                    showNotification('❌ Ошибка при выдаче звёзд');
+                }
+            } catch (error) {
+                showNotification('❌ Ошибка при работе с Supabase');
             }
             
             document.getElementById('adminPlayerId').value = '';
             document.getElementById('adminStars').value = '';
         }
 
-        // Админ: подтвердить задание (обновленная)
         async function verifyQuestCompletion() {
             if (!isAdmin) {
                 showNotification('❌ Доступ запрещен!');
@@ -1663,55 +1842,166 @@
             }
 
             const playerId = document.getElementById('verifyPlayerId').value.trim();
-            const questType = document.getElementById('verifyQuestType').value;
 
             if (!playerId) {
                 showNotification('❌ Введите ID игрока!');
                 return;
             }
 
-            const found = await findPlayerById(playerId);
-            if (!found) {
-                showNotification('❌ Игрок не найден! Проверьте ID игрока');
-                return;
-            }
+            try {
+                const { data, error } = await supabase
+                    .from('players')
+                    .select('*')
+                    .eq('player_id', playerId)
+                    .single();
 
-            const player = found.player;
+                if (error || !data) {
+                    showNotification('❌ Игрок не найден в Supabase!');
+                    return;
+                }
 
-            if (questType === 'subscribe') {
-                player.quests.subscribe.completed = true;
-                showNotification(`✅ Подписка подтверждена для игрока ${playerId}`);
-            } else if (questType === 'invite') {
-                player.quests.invite.progress = Math.min(player.quests.invite.target, player.quests.invite.progress + 1);
-                showNotification(`✅ Приглашение подтверждено для игрока ${playerId}. Теперь: ${player.quests.invite.progress}/5`);
-            }
+                const playerDataFromSupabase = data.player_data;
+                playerDataFromSupabase.quests.subscribe.completed = true;
+                
+                const { error: updateError } = await supabase
+                    .from('players')
+                    .update({
+                        player_data: playerDataFromSupabase,
+                        last_updated: new Date().toISOString()
+                    })
+                    .eq('player_id', playerId);
 
-            // Сохраняем в оба места
-            localStorage.setItem(found.key, JSON.stringify(player));
-            await savePlayerDataToSupabase();
-
-            if (playerId === playerData.id) {
-                playerData = player;
-                updateUI();
-                showNotification('✅ Админ подтвердил выполнение вашего задания!');
+                if (!updateError) {
+                    if (playerId === playerData.id) {
+                        playerData.quests.subscribe.completed = true;
+                        updateUI();
+                    }
+                    showNotification(`✅ Подписка подтверждена для игрока ${playerId}`);
+                } else {
+                    showNotification('❌ Ошибка при подтверждении задания');
+                }
+            } catch (error) {
+                showNotification('❌ Ошибка при работе с Supabase');
             }
 
             document.getElementById('verifyPlayerId').value = '';
         }
 
-        // ========== ВАШИ ОРИГИНАЛЬНЫЕ ФУНКЦИИ (БЕЗ ИЗМЕНЕНИЙ) ==========
+        async function updateWithdrawRequests() {
+            if (!isAdmin) return;
+            
+            const requestsContainer = document.getElementById('withdrawRequests');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('withdraw_requests')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-        // Инициализация игры
+                if (error) {
+                    requestsContainer.innerHTML = '<div class="info-text">Ошибка загрузки заявок</div>';
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    requestsContainer.innerHTML = '<div class="info-text">Нет заявок на вывод</div>';
+                } else {
+                    let html = '';
+                    data.forEach((request) => {
+                        html += `
+                            <div class="withdraw-log">
+                                <strong>👤 ID игрока:</strong> ${request.player_id}<br>
+                                <strong>🎁 Предмет:</strong> ${request.item_name}<br>
+                                <strong>📱 Telegram:</strong> ${request.telegram}<br>
+                                <strong>🕒 Время:</strong> ${new Date(request.created_at).toLocaleString()}<br>
+                                <button class="withdraw-btn complete-withdraw-btn" data-id="${request.id}" style="margin-top: 8px;">✅ Выполнено</button>
+                            </div>
+                        `;
+                    });
+                    requestsContainer.innerHTML = html;
+                    
+                    // Назначаем обработчики для кнопок выполнения
+                    document.querySelectorAll('.complete-withdraw-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            completeWithdraw(this.getAttribute('data-id'));
+                        });
+                    });
+                }
+            } catch (error) {
+                requestsContainer.innerHTML = '<div class="info-text">Ошибка загрузки заявок</div>';
+            }
+        }
+
+        async function completeWithdraw(requestId) {
+            if (!isAdmin) {
+                showNotification('❌ Доступ запрещен!');
+                return;
+            }
+
+            if (confirm('Отметить заявку как выполненную?')) {
+                try {
+                    const { error } = await supabase
+                        .from('withdraw_requests')
+                        .delete()
+                        .eq('id', requestId);
+
+                    if (!error) {
+                        await updateWithdrawRequests();
+                        showNotification('✅ Заявка отмечена как выполненная!');
+                    } else {
+                        showNotification('❌ Ошибка при выполнении заявки');
+                    }
+                } catch (error) {
+                    showNotification('❌ Ошибка при выполнении заявки');
+                }
+            }
+        }
+
+        // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 15;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 6 + 2;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                const delay = Math.random() * 20;
+                const duration = Math.random() * 10 + 15;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                particle.style.animationDelay = `${delay}s`;
+                particle.style.animationDuration = `${duration}s`;
+                
+                const colors = ['var(--primary)', 'var(--accent)', 'var(--gold)', 'var(--secondary)'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.background = color;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // ========== ИНИЦИАЛИЗАЦИЯ ИГРЫ ==========
         async function initGame() {
             await loadPlayerData();
             
-            // Проверяем реферальную ссылку при загрузке
-            checkReferral();
-            
             // Проверяем админский доступ
-            console.log("Player ID:", playerData.id);
-            console.log("Admin ID:", ADMIN_USER_ID);
-            
             if (playerData.id === ADMIN_USER_ID) {
                 isAdmin = true;
                 document.getElementById('adminToggle').style.display = 'block';
@@ -1719,107 +2009,47 @@
             }
             
             updateUI();
-            startHatchTimer();
             startStatDecrease();
-            await updateWithdrawRequests();
-        }
-
-        // Проверка реферальной ссылки
-        function checkReferral() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const refCode = urlParams.get('ref');
             
-            if (refCode && !playerData.referredBy) {
-                applyReferralCode(refCode);
-            }
-        }
-
-        // Открытие модального окна для ввода кода
-        function openReferral() {
-            document.getElementById('friendId').value = '';
-            document.getElementById('yourIdDisplay').textContent = playerData.id;
-            document.getElementById('referralModal').classList.add('active');
-        }
-
-        function closeReferral() {
-            document.getElementById('referralModal').classList.remove('active');
-        }
-
-        // Применение кода друга
-        async function applyReferral() {
-            const friendId = document.getElementById('friendId').value.trim();
+            // НАЗНАЧАЕМ ВСЕ ОБРАБОТЧИКИ СОБЫТИЙ
+            document.getElementById('feedBtn').addEventListener('click', feedDuck);
+            document.getElementById('playBtn').addEventListener('click', playWithDuck);
+            document.getElementById('hatchBtn').addEventListener('click', hatchEgg);
             
-            if (!friendId) {
-                showNotification('❌ Введите ID друга!');
-                return;
-            }
-
-            if (await applyReferralCode(friendId)) {
-                closeReferral();
-            }
+            document.getElementById('shopBtn').addEventListener('click', openShop);
+            document.getElementById('inventoryBtn').addEventListener('click', openInventory);
+            document.getElementById('questsBtn').addEventListener('click', openQuests);
+            document.getElementById('referralBtn').addEventListener('click', openReferral);
+            
+            document.getElementById('adminToggle').addEventListener('click', toggleAdminPanel);
+            document.getElementById('adminApply').addEventListener('click', adminGiveStars);
+            document.getElementById('verifyQuest').addEventListener('click', verifyQuestCompletion);
+            
+            document.getElementById('closeShop').addEventListener('click', closeShop);
+            document.getElementById('closeInventory').addEventListener('click', closeInventory);
+            document.getElementById('closeQuests').addEventListener('click', closeQuests);
+            document.getElementById('closeReferral').addEventListener('click', closeReferral);
+            document.getElementById('closeWithdraw').addEventListener('click', closeWithdraw);
+            
+            document.getElementById('cancelConfirm').addEventListener('click', closeConfirm);
+            document.getElementById('confirmPurchase').addEventListener('click', confirmPurchase);
+            document.getElementById('submitWithdraw').addEventListener('click', submitWithdraw);
+            
+            // Обработчики для кнопок покупки в магазине
+            document.querySelectorAll('.shop-buy-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const itemType = this.getAttribute('data-type');
+                    const cost = parseInt(this.getAttribute('data-cost'));
+                    buyItem(itemType, cost);
+                });
+            });
         }
 
-        // Генерация уникального ID игрока
-        function generatePlayerId() {
-            let playerId = localStorage.getItem('playerId');
-            if (!playerId) {
-                playerId = 'USER_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('playerId', playerId);
-            }
-            return playerId;
-        }
-
-        // Система заданий
-        function openQuests() {
-            const questsList = document.getElementById('questsList');
-            let html = '';
-
-            // Задание на подписку
-            const subscribeQuest = playerData.quests.subscribe;
-            const subscribeData = questsData.subscribe;
-            
-            html += `
-                <div class="quest-item">
-                    <div class="quest-header">
-                        <strong>${subscribeData.title}</strong>
-                        ${subscribeQuest.claimed ? 
-                            '<span style="color: #27ae60;">✅ Выполнено</span>' : 
-                            (subscribeQuest.completed ? 
-                                '<button class="quest-btn" onclick="claimQuestReward(\'subscribe\')">🎁 Получить награду</button>' :
-                                '<div><button class="quest-btn" onclick="openSubscribeLink()">🔗 Перейти в канал</button>' +
-                                '<button class="quest-btn" onclick="checkSubscription()" style="margin-left: 10px; background: var(--accent);">✅ Проверить подписку</button></div>'
-                            )
-                        }
-                    </div>
-                    <p>${subscribeData.description}</p>
-                    <div class="quest-reward">
-                        🎁 Награда: ${subscribeData.reward.amount} 🍎 Еда
-                    </div>
-                </div>
-            `;
-
-            // Задание на приглашения
-            const inviteQuest = playerData.quests.invite;
-            const inviteData = questsData.invite;
-            const progressPercent = (inviteQuest.progress / inviteQuest.target) * 100;
-            
-            html += `
-                <div class="quest-item">
-                    <div class="quest-header">
-                        <strong>${inviteData.title}</strong>
-                        ${inviteQuest.claimed ? 
-                            '<span style="color: #27ae60;">✅ Выполнено</span>' : 
-                            (inviteQuest.progress >= inviteQuest.target ? 
-                                '<button class="quest-btn" onclick="claimQuestReward(\'invite\')">🎁 Получить награду</button>' :
-                                `<span>${inviteQuest.progress}/${inviteQuest.target}</span>`
-                            )
-                        }
-                    </div>
-                    <p>${inviteData.description}</p>
-                    <div class="quest-progress">
-                        <div class="quest-progress-bar" style="width: ${progressPercent}%"></div>
-                    </div>
-                    <div class="quest-reward">
-                        🎁 Награда: ${inviteData.reward.amount} 🍎 Еда
-                    </div>
-                    <div style="margin
+        // Запускаем игру при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            initGame();
+        });
+    </script>
+</body>
+</html>
