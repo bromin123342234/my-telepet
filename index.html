@@ -3,168 +3,893 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🥚 NFT Duck Eggs</title>
+    <title>🥚 NFT Duck Eggs | Коллекционные утки</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* БАЗОВЫЕ СТИЛИ */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { 
-            background: linear-gradient(135deg, #0F0F1E 0%, #0A0A15 100%); 
-            min-height: 100vh; padding: 20px; color: #F8F9FA; 
-            display: flex; justify-content: center; align-items: center; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
+        :root {
+            --primary: #8B5FBF;
+            --primary-dark: #6B46C1;
+            --primary-light: #9D7BCF;
+            --secondary: #FF6B6B;
+            --secondary-dark: #FF4757;
+            --accent: #4ECDC4;
+            --accent-dark: #1DD1A1;
+            --gold: #FFD700;
+            --gold-dark: #FFA500;
+            --dark: #0F0F1E;
+            --darker: #0A0A15;
+            --dark-card: #1A1A2E;
+            --light: #F8F9FA;
+            --success: #27AE60;
+            --success-dark: #219A52;
+            --danger: #E74C3C;
+            --warning: #F39C12;
+            --purple-glow: rgba(139, 95, 191, 0.3);
+            --gold-glow: rgba(255, 215, 0, 0.3);
+            --success-glow: rgba(39, 174, 96, 0.3);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--darker) 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 95, 191, 0.15) 0%, transparent 25%),
+                radial-gradient(circle at 90% 80%, rgba(78, 205, 196, 0.15) 0%, transparent 25%),
+                radial-gradient(circle at 50% 50%, rgba(255, 107, 107, 0.1) 0%, transparent 30%);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(139, 95, 191, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(78, 205, 196, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
         .game-container {
-            background: rgba(26, 26, 46, 0.9); border-radius: 30px; padding: 35px 30px;
-            max-width: 450px; width: 100%; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(145deg, rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9));
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 35px 30px;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            animation: fadeInUp 0.8s ease-out;
         }
-        .player-id { 
-            position: absolute; top: 20px; left: 20px; background: gold; padding: 8px 16px;
-            border-radius: 20px; font-size: 12px; font-weight: 700; color: black; 
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
         }
-        .btn { 
-            padding: 15px; border: none; border-radius: 15px; font-weight: 700; cursor: pointer;
-            margin: 10px; width: 100%; color: white; font-size: 16px; 
+
+        .container-glow {
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--accent), var(--gold));
+            border-radius: 32px;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(15px);
+            animation: glowPulse 4s ease-in-out infinite;
         }
-        .btn-primary { background: linear-gradient(135deg, #8B5FBF, #6B46C1); }
-        .btn-secondary { background: linear-gradient(135deg, #FF6B6B, #FF4757); }
-        .btn-admin { background: gold; color: black; display: none; }
-        
-        /* МОДАЛЬНЫЕ ОКНА */
-        .modal { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; 
+
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.4; }
         }
-        .modal.active { display: flex; }
-        .modal-content { 
-            background: #1A1A2E; padding: 30px; border-radius: 20px; max-width: 400px; 
-            width: 90%; text-align: center; border: 1px solid rgba(255,255,255,0.1);
+
+        .player-id {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--dark);
+            box-shadow: 0 6px 20px var(--gold-glow);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 10;
         }
-        .close-btn { 
-            position: absolute; top: 15px; right: 15px; background: red; color: white;
-            border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;
+
+        .header {
+            margin-bottom: 30px;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 20px var(--purple-glow);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .egg-display {
+            margin: 30px 0;
+            position: relative;
+            padding: 25px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                inset 0 2px 4px rgba(255, 255, 255, 0.05),
+                0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .duck-frame {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            margin: 0 auto 20px auto;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            padding: 8px;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+        }
+
+        .egg-type {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 700;
+            margin-top: 15px;
+            display: inline-block;
+            box-shadow: 0 6px 20px var(--purple-glow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 14px;
+        }
+
+        .death-message {
+            color: var(--danger);
+            font-weight: 700;
+            margin: 15px 0;
+            text-shadow: 0 2px 15px rgba(231, 76, 60, 0.4);
+            font-size: 16px;
+            padding: 15px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .food-count {
+            background: linear-gradient(135deg, var(--success), var(--success-dark));
+            color: white;
+            padding: 15px 25px;
+            border-radius: 20px;
+            margin: 20px 0;
+            font-weight: 700;
+            box-shadow: 0 8px 25px var(--success-glow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            color: white;
+            padding: 25px 20px;
+            border-radius: 20px;
+            text-align: center;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 6px 20px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 12px 30px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 20px 20px 0 0;
+        }
+
+        .stat-icon {
+            font-size: 1.5em;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .stat-value {
+            font-size: 1.9em;
+            font-weight: 800;
+            margin-top: 5px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, var(--light), #ccc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-progress {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            height: 8px;
+            margin-top: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hunger-progress {
+            background: linear-gradient(135deg, var(--success), var(--success-dark));
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.5s ease;
+            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.4);
+        }
+
+        .mood-progress {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.5s ease;
+            box-shadow: 0 2px 8px rgba(78, 205, 196, 0.4);
+        }
+
+        .stars-display {
+            color: var(--gold);
+            text-shadow: 0 0 15px var(--gold-glow);
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            padding: 20px;
+            border: none;
+            border-radius: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+            color: white;
+        }
+
+        .btn-admin {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--dark);
+            font-weight: 800;
+            margin: 20px 0;
+            width: 100%;
+            padding: 18px;
+            box-shadow: 0 6px 20px var(--gold-glow);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .menu-section {
+            margin-top: 30px;
+        }
+
+        .menu-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            padding: 20px;
+            border: none;
+            border-radius: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.5);
+        }
+
+        .info-text {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+            padding: 20px;
+            border-radius: 18px;
+            margin-top: 25px;
+            font-size: 14px;
+            color: #ccc;
+            line-height: 1.5;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .balance-info {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--dark);
+            padding: 18px 25px;
+            border-radius: 20px;
+            margin: 20px 0;
+            font-weight: 700;
+            font-size: 14px;
+            text-align: center;
+            box-shadow: 0 6px 20px var(--gold-glow);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .admin-panel {
+            background: linear-gradient(145deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.95));
+            border-radius: 25px;
+            padding: 30px;
+            margin-top: 25px;
+            color: white;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-panel.active {
+            display: block;
+            animation: slideDown 0.4s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .admin-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .admin-input {
+            padding: 14px 18px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .admin-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 95, 191, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #C0392B);
+            color: white;
+            margin-top: 15px;
+        }
+
+        .admin-header {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--gold);
+            font-size: 1.4em;
+            text-shadow: 0 2px 15px var(--gold-glow);
+            font-weight: 700;
+        }
+
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, rgba(26, 26, 46, 0.98), rgba(22, 33, 62, 0.98));
+            backdrop-filter: blur(25px);
+            border-radius: 30px;
+            padding: 35px;
+            max-width: 520px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--light);
+            font-size: 1.8em;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .shop-item {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+            padding: 25px;
+            border-radius: 20px;
+            margin: 18px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .shop-item:hover {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+            transform: translateY(-3px);
+        }
+
+        .inventory-item {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+            padding: 22px;
+            border-radius: 18px;
+            margin: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .inventory-item:hover {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+            transform: translateY(-2px);
+        }
+
+        .quest-item {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+            padding: 25px;
+            border-radius: 20px;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .close-btn:hover {
+            transform: rotate(90deg) scale(1.1);
+            background: #C0392B;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            justify-content: center;
+        }
+
+        .empty-inventory {
+            text-align: center;
+            padding: 50px 30px;
+            color: #999;
+        }
+
+        .withdraw-btn {
+            background: linear-gradient(135deg, var(--success), var(--success-dark));
+            color: white;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--success-glow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .withdraw-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--success-glow);
+        }
+
+        .quest-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--purple-glow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .quest-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--purple-glow);
+        }
+
+        .notification {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            padding: 18px 28px;
+            background: linear-gradient(135deg, var(--success), var(--success-dark));
+            color: white;
+            border-radius: 18px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.4s ease;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+            max-width: 350px;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 25px 20px;
+                margin: 10px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .actions-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2.2em;
+            }
+            
+            .duck-frame {
+                width: 140px;
+                height: 140px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="game-container">
+        <div class="container-glow"></div>
+        
         <div class="player-id">ID: <span id="playerId">Загрузка...</span></div>
         
-        <h1>🦆 NFT Ducks</h1>
-        
-        <div class="egg-display">
-            <div style="width: 120px; height: 120px; margin: 20px auto; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center;">
-                <span id="duckStatus">❌</span>
-            </div>
-            <div id="eggTypeDisplay" style="background: #8B5FBF; color: white; padding: 10px 20px; border-radius: 20px; margin: 10px 0;">
-                Нет утки
-            </div>
-            <div id="deathMessage" style="color: red; display: none;">💀 Утка умерла!</div>
-        </div>
-        
-        <div id="foodCount" style="background: #27AE60; color: white; padding: 10px 20px; border-radius: 20px; margin: 10px 0;">
-            🍎 Еды: 0
-        </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0;">
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px;">
-                <div>🍽️ Сытость</div>
-                <div id="hungerValue">0/100</div>
-            </div>
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px;">
-                <div>😊 Настроение</div>
-                <div id="moodValue">0/100</div>
-            </div>
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px;">
-                <div>⭐ Звёзды</div>
-                <div id="starsValue">0</div>
-            </div>
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px;">
-                <div>🎒 Предметы</div>
-                <div id="itemsValue">0</div>
+        <div class="header">
+            <h1>🦆 NFT Ducks</h1>
+            <div class="egg-display">
+                <div class="duck-frame" id="duckDisplay">
+                    ❌
+                </div>
+                <div class="egg-type" id="eggTypeDisplay">Нет утки</div>
+                <div id="deathMessage" class="death-message" style="display: none;">💀 Утка умерла! Купите новую</div>
             </div>
         </div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0;">
-            <button class="btn btn-primary" onclick="feedDuck()">🍎 Покормить</button>
-            <button class="btn btn-secondary" onclick="playWithDuck()">🎮 Поиграть</button>
+        <div class="food-count" id="foodCount">🍎 Еды: 0</div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-icon">🍽️</span>
+                <div>Сытость</div>
+                <div class="stat-value" id="hungerValue">0/100</div>
+                <div class="stat-progress">
+                    <div class="hunger-progress" id="hungerProgress" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">😊</span>
+                <div>Настроение</div>
+                <div class="stat-value" id="moodValue">0/100</div>
+                <div class="stat-progress">
+                    <div class="mood-progress" id="moodProgress" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">⭐</span>
+                <div>Звёзды</div>
+                <div class="stat-value stars-display" id="starsValue">0</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">🎒</span>
+                <div>Предметы</div>
+                <div class="stat-value" id="itemsValue">0</div>
+            </div>
+        </div>
+        
+        <div class="actions-grid">
+            <button class="btn btn-primary" onclick="feedDuck()">
+                <span>🍎</span>
+                <span>Покормить</span>
+            </button>
+            <button class="btn btn-secondary" onclick="playWithDuck()">
+                <span>🎮</span>
+                <span>Поиграть</span>
+            </button>
         </div>
 
-        <button class="btn btn-admin" id="adminToggle" onclick="toggleAdminPanel()">🔧 Админ Панель</button>
+        <button class="btn btn-admin" id="adminToggle" onclick="toggleAdminPanel()" style="display: none;">
+            <span>🔧</span>
+            <span>Админ Панель</span>
+        </button>
         
-        <div style="margin-top: 20px;">
-            <button class="btn btn-primary" onclick="openShop()">🛒 Магазин</button>
-            <button class="btn btn-primary" onclick="openInventory()">🎒 Инвентарь</button>
-            <button class="btn btn-primary" onclick="openQuests()">🎯 Задания</button>
-            <button class="btn btn-primary" onclick="openReferral()">👥 Реф система</button>
+        <div class="menu-section">
+            <button class="menu-btn" onclick="openShop()">
+                <span>🛒</span>
+                <span>Магазин</span>
+            </button>
+            <button class="menu-btn" onclick="openInventory()">
+                <span>🎒</span>
+                <span>Инвентарь</span>
+            </button>
+            <button class="menu-btn" onclick="openQuests()">
+                <span>🎯</span>
+                <span>Задания</span>
+            </button>
+            <button class="menu-btn" onclick="openReferral()">
+                <span>👥</span>
+                <span>Реферальная система</span>
+            </button>
         </div>
 
-        <div id="adminPanel" style="display: none; margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px;">
-            <h3>🔧 Админ Панель</h3>
-            <input type="text" id="adminPlayerId" placeholder="ID игрока" style="width: 100%; padding: 10px; margin: 5px 0; border-radius: 10px; border: 1px solid #ccc;">
-            <input type="number" id="adminStars" placeholder="Звёзды" style="width: 100%; padding: 10px; margin: 5px 0; border-radius: 10px; border: 1px solid #ccc;">
-            <button class="btn btn-primary" onclick="adminGiveStars()">✅ Выдать звёзды</button>
+        <div class="balance-info">
+            💎 Чтобы пополнить баланс, подарите подарок на аккаунт @NFT_c0llecti0n
+        </div>
+
+        <div class="info-text">
+            <strong>🎮 Ухаживайте за уткой!</strong><br>
+            Кормите и играйте с уткой, чтобы получить уникальные NFT-предметы
+        </div>
+
+        <div class="admin-panel" id="adminPanel">
+            <div class="admin-controls">
+                <div class="admin-header">🔧 Админ Панель</div>
+                
+                <input type="text" class="admin-input" placeholder="ID игрока" id="adminPlayerId">
+                <input type="number" class="admin-input" placeholder="Количество звёзд" id="adminStars">
+                
+                <button class="btn btn-admin" onclick="adminGiveStars()">✅ Выдать звёзды</button>
+                <button class="btn btn-danger" onclick="adminReset()">🔄 Сбросить прогресс</button>
+                
+                <div class="admin-header" style="margin-top: 25px;">📊 Заявки на вывод</div>
+                <div id="withdrawRequests">Загрузка...</div>
+            </div>
         </div>
     </div>
 
-    <!-- МОДАЛЬНЫЕ ОКНА -->
+    <!-- Модальные окна -->
     <div class="modal" id="shopModal">
         <div class="modal-content">
             <button class="close-btn" onclick="closeShop()">×</button>
-            <h2>🛒 Магазин</h2>
+            <h2 class="modal-header">🛒 Магазин</h2>
             
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; margin: 10px 0; border-radius: 15px;">
-                <div><strong>✨ Золотая утка - 300 ⭐</strong></div>
-                <button class="btn btn-primary" onclick="buyItem('gold_egg', 300)">Купить</button>
+            <div class="shop-item">
+                <div>
+                    <strong>✨ Золотая утка</strong><br>
+                    <small>Шансы: Шампанское 50%, Календарик 25%, Tama Gadget 20%, Evil Eye 10%, Love Potion 5%</small>
+                </div>
+                <button class="btn btn-primary" onclick="buyItem('gold_egg', 300)">300 ⭐</button>
             </div>
             
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; margin: 10px 0; border-radius: 15px;">
-                <div><strong>🍎 Еда (3 шт) - 15 ⭐</strong></div>
-                <button class="btn btn-primary" onclick="buyItem('food', 15)">Купить</button>
+            <div class="shop-item">
+                <div>
+                    <strong>🍎 Еда (3 шт)</strong><br>
+                    <small>Пополните запас еды для кормления</small>
+                </div>
+                <button class="btn btn-primary" onclick="buyItem('food', 15)">15 ⭐</button>
             </div>
             
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; margin: 10px 0; border-radius: 15px;">
-                <div><strong>🦆 Обычная утка - 50 ⭐</strong></div>
-                <button class="btn btn-primary" onclick="buyItem('normal_egg', 50)">Купить</button>
+            <div class="shop-item">
+                <div>
+                    <strong>🦆 Обычная утка</strong><br>
+                    <small>Шансы: Мишка 50%, Роза 25%, Календарик 5%</small>
+                </div>
+                <button class="btn btn-primary" onclick="buyItem('normal_egg', 50)">50 ⭐</button>
             </div>
         </div>
     </div>
 
     <div class="modal" id="confirmModal">
         <div class="modal-content">
-            <h3>Подтверждение</h3>
-            <p id="confirmText">Вы уверены?</p>
-            <button class="btn btn-secondary" onclick="closeConfirm()">Отмена</button>
-            <button class="btn btn-primary" onclick="confirmPurchase()">Подтвердить</button>
+            <h3>Подтверждение покупки</h3>
+            <p id="confirmText">Вы уверены, что хотите купить этот предмет?</p>
+            <div class="confirm-buttons">
+                <button class="btn btn-secondary" onclick="closeConfirm()">Отмена</button>
+                <button class="btn btn-primary" onclick="confirmPurchase()">Подтвердить</button>
+            </div>
         </div>
     </div>
 
     <div class="modal" id="inventoryModal">
         <div class="modal-content">
             <button class="close-btn" onclick="closeInventory()">×</button>
-            <h2>🎒 Инвентарь</h2>
-            <div id="inventoryItems">Пусто</div>
+            <h2 class="modal-header">🎒 Инвентарь</h2>
+            <div id="inventoryItems"></div>
         </div>
     </div>
 
     <div class="modal" id="withdrawModal">
         <div class="modal-content">
             <button class="close-btn" onclick="closeWithdraw()">×</button>
-            <h2>📤 Вывод</h2>
-            <p>Предмет: <strong id="withdrawItemName"></strong></p>
-            <input type="text" id="telegramUsername" placeholder="@username" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 10px;">
-            <button class="btn btn-primary" onclick="submitWithdraw()">✅ Отправить</button>
+            <h2 class="modal-header">📤 Заявка на вывод</h2>
+            <div class="info-text">
+                <p>Вы хотите вывести предмет: <strong id="withdrawItemName"></strong></p>
+                <p>Напишите ваш Telegram username для связи:</p>
+                <input type="text" class="admin-input" id="telegramUsername" placeholder="@username">
+                <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="submitWithdraw()">✅ Отправить заявку</button>
+            </div>
         </div>
     </div>
 
     <div class="modal" id="questsModal">
         <div class="modal-content">
             <button class="close-btn" onclick="closeQuests()">×</button>
-            <h2>🎯 Задания</h2>
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; margin: 10px 0; border-radius: 15px;">
-                <strong>📢 Подписка на канал</strong>
-                <p>Подпишитесь на @MyNFTPet</p>
-                <button class="btn btn-primary" onclick="openTelegram()">🔗 Перейти</button>
-                <button class="btn btn-primary" onclick="claimQuest()">🎁 Получить 10⭐</button>
+            <h2 class="modal-header">🎯 Задания</h2>
+            <div class="quest-item">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <strong>📢 Подписка на канал</strong>
+                    <button class="quest-btn" onclick="claimQuest()">🎁 Получить 10⭐</button>
+                </div>
+                <p>Подпишитесь на наш Telegram канал @MyNFTPet</p>
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 14px; color: var(--gold); font-weight: 600;">
+                    🎁 Награда: 10 ⭐ Звёзды
+                </div>
             </div>
         </div>
     </div>
@@ -172,10 +897,16 @@
     <div class="modal" id="referralModal">
         <div class="modal-content">
             <button class="close-btn" onclick="closeReferral()">×</button>
-            <h2>👥 Реферальная система</h2>
-            <p style="color: orange;">⚠️ Временно закрыта</p>
+            <h2 class="modal-header">👥 Реферальная система</h2>
+            <div class="info-text">
+                <p style="text-align: center; color: var(--warning); font-weight: bold;">
+                    ⚠️ Реферальная система временно закрыта
+                </p>
+            </div>
         </div>
     </div>
+    
+    <div class="notification" id="notification"></div>
 
     <script>
         // ПРОСТЫЕ ДАННЫЕ ИГРОКА
@@ -195,7 +926,7 @@
 
         // ИНИЦИАЛИЗАЦИЯ ИГРЫ
         function initGame() {
-            console.log("Игра запускается...");
+            console.log("🎮 Игра запускается...");
             
             // Генерируем ID
             playerData.id = 'USER_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -207,10 +938,11 @@
             // Проверяем админа
             if (playerData.id === "USER_1761399526979_swpx4n20o") {
                 document.getElementById('adminToggle').style.display = 'block';
+                showNotification('👑 Добро пожаловать, Админ!');
             }
             
             updateUI();
-            showNotification('🎉 Добро пожаловать!');
+            showNotification('🎉 Добро пожаловать! Вы получили 3 единицы еды!');
         }
 
         // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
@@ -221,48 +953,70 @@
             document.getElementById('itemsValue').textContent = playerData.items.length;
             document.getElementById('foodCount').textContent = '🍎 Еды: ' + playerData.foodCount;
 
+            // Обновляем прогресс-бары
+            document.getElementById('hungerProgress').style.width = playerData.hunger + '%';
+            document.getElementById('moodProgress').style.width = playerData.mood + '%';
+
+            // Обновляем отображение утки
+            const duckDisplay = document.getElementById('duckDisplay');
+            const eggTypeDisplay = document.getElementById('eggTypeDisplay');
+            const deathMessage = document.getElementById('deathMessage');
+
             if (!playerData.isAlive) {
-                document.getElementById('duckStatus').textContent = '💀';
-                document.getElementById('eggTypeDisplay').textContent = 'Утка умерла';
-                document.getElementById('deathMessage').style.display = 'block';
+                duckDisplay.innerHTML = '💀';
+                duckDisplay.style.background = 'linear-gradient(135deg, #666, #333)';
+                eggTypeDisplay.textContent = 'Утка умерла';
+                eggTypeDisplay.style.background = 'linear-gradient(135deg, #666, #333)';
+                deathMessage.style.display = 'block';
             } else if (playerData.currentEgg) {
-                document.getElementById('duckStatus').textContent = '🥚';
-                document.getElementById('eggTypeDisplay').textContent = playerData.currentEgg.type === 'gold_egg' ? '✨ Золотая утка' : '🦆 Обычная утка';
-                document.getElementById('deathMessage').style.display = 'none';
+                if (playerData.currentEgg.type === 'gold_egg') {
+                    duckDisplay.innerHTML = '✨';
+                    duckDisplay.style.background = 'linear-gradient(135deg, var(--gold), var(--gold-dark))';
+                    eggTypeDisplay.textContent = 'Золотая утка';
+                    eggTypeDisplay.style.background = 'linear-gradient(135deg, var(--gold), var(--gold-dark))';
+                } else {
+                    duckDisplay.innerHTML = '🦆';
+                    duckDisplay.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
+                    eggTypeDisplay.textContent = 'Обычная утка';
+                    eggTypeDisplay.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
+                }
+                deathMessage.style.display = 'none';
             } else {
-                document.getElementById('duckStatus').textContent = '❌';
-                document.getElementById('eggTypeDisplay').textContent = 'Нет утки';
-                document.getElementById('deathMessage').style.display = 'none';
+                duckDisplay.innerHTML = '❌';
+                duckDisplay.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))';
+                eggTypeDisplay.textContent = 'Нет утки';
+                eggTypeDisplay.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
+                deathMessage.style.display = 'none';
             }
         }
 
         // УХОД ЗА УТКОЙ
         function feedDuck() {
-            console.log("Кормление утки...");
+            console.log("🍎 Кормление утки...");
             if (!playerData.isAlive) {
-                showNotification('❌ Утка умерла! Купите новую.');
+                showNotification('❌ Утка умерла! Купите новую утку.');
                 return;
             }
             if (playerData.foodCount <= 0) {
-                showNotification('❌ Нет еды!');
+                showNotification('❌ Недостаточно еды! Купите еду в магазине.');
                 return;
             }
             playerData.hunger = Math.min(100, playerData.hunger + 14);
             playerData.foodCount--;
             updateUI();
-            showNotification('🍎 +14 к сытости');
+            showNotification('🍎 Утка покормлена! +14 к сытости');
             checkDeath();
         }
 
         function playWithDuck() {
-            console.log("Игра с уткой...");
+            console.log("🎮 Игра с уткой...");
             if (!playerData.isAlive) {
-                showNotification('❌ Утка умерла!');
+                showNotification('❌ Утка умерла! Купите новую утку.');
                 return;
             }
             playerData.mood = Math.min(100, playerData.mood + 10);
             updateUI();
-            showNotification('🎮 +10 к настроению');
+            showNotification('🎮 Вы поиграли с уткой! +10 к настроению');
         }
 
         function checkDeath() {
@@ -270,13 +1024,13 @@
                 playerData.isAlive = false;
                 playerData.currentEgg = null;
                 updateUI();
-                showNotification('💀 Утка умерла!');
+                showNotification('💀 Утка умерла от голода или плохого настроения! Купите новую утку.');
             }
         }
 
         // МАГАЗИН
         function openShop() {
-            console.log("Открываем магазин...");
+            console.log("🛒 Открываем магазин...");
             document.getElementById('shopModal').classList.add('active');
         }
 
@@ -285,9 +1039,14 @@
         }
 
         function buyItem(itemType, cost) {
-            console.log("Покупаем:", itemType);
+            console.log("💰 Покупаем:", itemType, "за", cost, "звёзд");
             currentPurchase = { itemType, cost };
-            document.getElementById('confirmText').textContent = `Купить за ${cost}⭐?`;
+            const itemNames = {
+                'gold_egg': 'Золотую утку',
+                'normal_egg': 'Обычную утку', 
+                'food': '3 единицы еды'
+            };
+            document.getElementById('confirmText').textContent = `Вы уверены, что хотите купить ${itemNames[itemType]} за ${cost} звёзд?`;
             document.getElementById('confirmModal').classList.add('active');
         }
 
@@ -300,6 +1059,7 @@
             
             const { itemType, cost } = currentPurchase;
             
+            // ПРОВЕРКА БАЛАНСА
             if (playerData.stars < cost) {
                 showNotification('❌ Недостаточно звёзд!');
                 closeConfirm();
@@ -310,14 +1070,14 @@
             
             if (itemType === 'food') {
                 playerData.foodCount += 3;
-                showNotification('🎉 Куплено 3 еды!');
+                showNotification('🎉 Вы купили 3 единицы еды!');
             } else {
                 // Покупаем утку
                 playerData.currentEgg = { type: itemType };
                 playerData.isAlive = true;
                 playerData.hunger = 100;
                 playerData.mood = 100;
-                showNotification('🎉 Куплена утка!');
+                showNotification('🎉 Вы купили утку! Ухаживайте за ней.');
             }
             
             updateUI();
@@ -327,19 +1087,30 @@
 
         // ИНВЕНТАРЬ И ВЫВОД
         function openInventory() {
-            console.log("Открываем инвентарь...");
-            const itemsDiv = document.getElementById('inventoryItems');
+            console.log("🎒 Открываем инвентарь...");
+            const inventoryItems = document.getElementById('inventoryItems');
             
             if (playerData.items.length === 0) {
-                itemsDiv.innerHTML = '<p>Инвентарь пуст</p>';
+                inventoryItems.innerHTML = `
+                    <div class="empty-inventory">
+                        <h3>🎒 Инвентарь пуст</h3>
+                        <p>Вылупите яйцо, чтобы получить предметы!</p>
+                    </div>
+                `;
             } else {
                 let html = '';
                 playerData.items.forEach((item, index) => {
-                    html += `<div style="background: rgba(255,255,255,0.1); padding: 10px; margin: 5px 0; border-radius: 10px;">
-                        ${item.name} <button onclick="startWithdraw(${index})" style="background: #27AE60; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-left: 10px;">Вывод</button>
-                    </div>`;
+                    html += `
+                        <div class="inventory-item">
+                            <div>
+                                <strong>${item.name}</strong><br>
+                                <small>Из: ${item.type === 'gold_egg' ? 'Золотой утки' : 'Обычной утки'}</small>
+                            </div>
+                            <button class="withdraw-btn" onclick="startWithdraw(${index})">📤 Вывод</button>
+                        </div>
+                    `;
                 });
-                itemsDiv.innerHTML = html;
+                inventoryItems.innerHTML = html;
             }
             
             document.getElementById('inventoryModal').classList.add('active');
@@ -353,6 +1124,7 @@
             currentWithdrawItem = itemIndex;
             const item = playerData.items[itemIndex];
             document.getElementById('withdrawItemName').textContent = item.name;
+            document.getElementById('telegramUsername').value = '';
             document.getElementById('withdrawModal').classList.add('active');
         }
 
@@ -361,23 +1133,30 @@
         }
 
         function submitWithdraw() {
-            const telegram = document.getElementById('telegramUsername').value;
+            const telegram = document.getElementById('telegramUsername').value.trim();
             if (!telegram) {
-                showNotification('❌ Введите Telegram!');
+                showNotification('❌ Введите Telegram username!');
                 return;
             }
+
+            if (!telegram.startsWith('@')) {
+                showNotification('❌ Telegram username должен начинаться с @!');
+                return;
+            }
+
+            const item = playerData.items[currentWithdrawItem];
             
             // Удаляем предмет из инвентаря
             playerData.items.splice(currentWithdrawItem, 1);
             updateUI();
             closeWithdraw();
             closeInventory();
-            showNotification('✅ Заявка отправлена!');
+            showNotification('✅ Заявка на вывод отправлена! С вами свяжутся в Telegram.');
         }
 
         // ЗАДАНИЯ
         function openQuests() {
-            console.log("Открываем задания...");
+            console.log("🎯 Открываем задания...");
             document.getElementById('questsModal').classList.add('active');
         }
 
@@ -385,20 +1164,16 @@
             document.getElementById('questsModal').classList.remove('active');
         }
 
-        function openTelegram() {
-            window.open('https://t.me/MyNFTPet', '_blank');
-        }
-
         function claimQuest() {
             playerData.stars += 10;
             updateUI();
-            showNotification('🎉 Получено 10 звёзд!');
+            showNotification('🎉 Вы получили 10 звёзд за выполнение задания!');
             closeQuests();
         }
 
         // РЕФЕРАЛЬНАЯ СИСТЕМА
         function openReferral() {
-            console.log("Открываем реф систему...");
+            console.log("👥 Открываем реф систему...");
             document.getElementById('referralModal').classList.add('active');
         }
 
@@ -409,34 +1184,54 @@
         // АДМИН ПАНЕЛЬ
         function toggleAdminPanel() {
             const panel = document.getElementById('adminPanel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            panel.classList.toggle('active');
         }
 
         function adminGiveStars() {
-            const playerId = document.getElementById('adminPlayerId').value;
+            const playerId = document.getElementById('adminPlayerId').value.trim();
             const stars = parseInt(document.getElementById('adminStars').value);
-            
+
             if (!playerId || isNaN(stars)) {
-                showNotification('❌ Заполните поля!');
+                showNotification('❌ Заполните ID игрока и количество звёзд!');
                 return;
             }
-            
+
+            if (stars <= 0) {
+                showNotification('❌ Количество звёзд должно быть больше 0!');
+                return;
+            }
+
             if (playerId === playerData.id) {
                 playerData.stars += stars;
                 updateUI();
+                showNotification(`✅ Админ выдал вам ${stars} звёзд!`);
+            } else {
+                showNotification(`✅ Выдано ${stars} звёзд игроку ${playerId}`);
             }
             
-            showNotification(`✅ Выдано ${stars} звёзд игроку ${playerId}`);
             document.getElementById('adminPlayerId').value = '';
             document.getElementById('adminStars').value = '';
         }
 
-        // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-        function showNotification(message) {
-            alert(message); // Простой alert вместо сложного уведомления
+        function adminReset() {
+            if (confirm('Сбросить весь прогресс?')) {
+                localStorage.clear();
+                location.reload();
+            }
         }
 
-        // ЗАПУСКАЕМ ИГРУ ПРИ ЗАГРУЗКЕ
+        // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // ЗАПУСКАЕМ ИГРУ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
         window.onload = initGame;
     </script>
 </body>
