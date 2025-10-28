@@ -3,1175 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🥚 NFT Duck Eggs | Коллекционные утки</title>
+    <title>🥚 NFT Duck Eggs</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* ВСЕ СТИЛИ ОСТАЮТСЯ ПРЕЖНИМИ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* БАЗОВЫЕ СТИЛИ */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { 
+            background: linear-gradient(135deg, #0F0F1E 0%, #0A0A15 100%); 
+            min-height: 100vh; padding: 20px; color: #F8F9FA; 
+            display: flex; justify-content: center; align-items: center; 
         }
-
-        :root {
-            --primary: #8B5FBF;
-            --primary-dark: #6B46C1;
-            --primary-light: #9D7BCF;
-            --secondary: #FF6B6B;
-            --secondary-dark: #FF4757;
-            --accent: #4ECDC4;
-            --accent-dark: #1DD1A1;
-            --gold: #FFD700;
-            --gold-dark: #FFA500;
-            --dark: #0F0F1E;
-            --darker: #0A0A15;
-            --dark-card: #1A1A2E;
-            --light: #F8F9FA;
-            --success: #27AE60;
-            --success-dark: #219A52;
-            --danger: #E74C3C;
-            --warning: #F39C12;
-            --purple-glow: rgba(139, 95, 191, 0.3);
-            --gold-glow: rgba(255, 215, 0, 0.3);
-            --success-glow: rgba(39, 174, 96, 0.3);
-        }
-
-        body {
-            background: linear-gradient(135deg, var(--dark) 0%, var(--darker) 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: var(--light);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(139, 95, 191, 0.15) 0%, transparent 25%),
-                radial-gradient(circle at 90% 80%, rgba(78, 205, 196, 0.15) 0%, transparent 25%),
-                radial-gradient(circle at 50% 50%, rgba(255, 107, 107, 0.1) 0%, transparent 30%);
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(139, 95, 191, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(78, 205, 196, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .floating-particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .particle {
-            position: absolute;
-            background: var(--gold);
-            border-radius: 50%;
-            opacity: 0.1;
-            animation: floatParticle 20s infinite linear;
-        }
-
-        @keyframes floatParticle {
-            0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
-            25% { transform: translateY(-20px) translateX(10px) rotate(90deg); }
-            50% { transform: translateY(0) translateX(20px) rotate(180deg); }
-            75% { transform: translateY(20px) translateX(10px) rotate(270deg); }
-        }
-
         .game-container {
-            background: linear-gradient(145deg, rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9));
-            backdrop-filter: blur(20px);
-            border-radius: 30px;
-            padding: 35px 30px;
-            box-shadow: 
-                0 25px 50px rgba(0, 0, 0, 0.5),
-                0 0 0 1px rgba(255, 255, 255, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            max-width: 450px;
-            width: 100%;
-            text-align: center;
-            position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            animation: fadeInUp 0.8s ease-out;
-            transform-style: preserve-3d;
-            perspective: 1000px;
-        }
-
-        @keyframes fadeInUp {
-            from { 
-                opacity: 0; 
-                transform: translateY(30px) rotateX(5deg);
-            }
-            to { 
-                opacity: 1; 
-                transform: translateY(0) rotateX(0);
-            }
-        }
-
-        .container-glow {
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--primary), var(--accent), var(--gold));
-            border-radius: 32px;
-            z-index: -1;
-            opacity: 0.3;
-            filter: blur(15px);
-            animation: glowPulse 4s ease-in-out infinite;
-        }
-
-        @keyframes glowPulse {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 0.4; }
-        }
-
-        .player-id {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--dark);
-            box-shadow: 0 6px 20px var(--gold-glow);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            z-index: 10;
-            transition: all 0.3s ease;
-        }
-
-        .player-id:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px var(--gold-glow);
-        }
-
-        .header {
-            margin-bottom: 30px;
-            margin-top: 15px;
-            position: relative;
-        }
-
-        .header h1 {
-            font-size: 2.8em;
-            margin-bottom: 15px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--gold) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 4px 20px var(--purple-glow);
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            position: relative;
-            display: inline-block;
-        }
-
-        .header h1::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 25%;
-            width: 50%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--primary), var(--accent), transparent);
-            border-radius: 2px;
-        }
-
-        .egg-display {
-            margin: 30px 0;
-            position: relative;
-            padding: 25px;
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-            border-radius: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            box-shadow: 
-                inset 0 2px 4px rgba(255, 255, 255, 0.05),
-                0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .duck-frame {
-            position: relative;
-            width: 160px;
-            height: 160px;
-            margin: 0 auto 20px auto;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            padding: 8px;
-            box-shadow: 
-                0 10px 30px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        .custom-duck {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid var(--gold);
-            box-shadow: 
-                0 8px 25px var(--gold-glow),
-                inset 0 2px 4px rgba(255, 255, 255, 0.2);
-            animation: float 3s ease-in-out infinite;
-            transition: all 0.3s ease;
-        }
-
-        .egg-type {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-weight: 700;
-            margin-top: 15px;
-            display: inline-block;
-            box-shadow: 0 6px 20px var(--purple-glow);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            font-size: 14px;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-        }
-
-        .egg-type:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px var(--purple-glow);
-        }
-
-        .timer {
-            background: linear-gradient(135deg, var(--warning), var(--danger));
-            color: white;
-            padding: 12px 25px;
-            border-radius: 20px;
-            margin: 15px 0;
-            font-weight: 700;
-            font-size: 15px;
-            box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: none;
-            animation: pulseWarning 2s infinite;
-        }
-
-        @keyframes pulseWarning {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-
-        .hatch-btn {
-            background: linear-gradient(135deg, var(--success), var(--success-dark));
-            color: white;
-            padding: 18px 35px;
-            border: none;
-            border-radius: 20px;
-            font-weight: 700;
-            cursor: pointer;
-            margin: 15px 0;
-            font-size: 16px;
-            box-shadow: 0 8px 25px var(--success-glow);
-            transition: all 0.3s ease;
-            display: none;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            letter-spacing: 0.5px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hatch-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .hatch-btn:hover::before {
-            left: 100%;
-        }
-
-        .hatch-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px var(--success-glow);
-        }
-
-        @keyframes float {
-            0%, 100% { 
-                transform: translateY(0px) scale(1) rotate(0deg);
-                box-shadow: 0 8px 25px var(--gold-glow);
-            }
-            50% { 
-                transform: translateY(-12px) scale(1.05) rotate(2deg);
-                box-shadow: 0 15px 35px var(--gold-glow);
-            }
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            color: white;
-            padding: 25px 20px;
-            border-radius: 20px;
-            text-align: center;
-            position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            box-shadow: 
-                0 6px 20px rgba(0, 0, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 
-                0 12px 30px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            border-radius: 20px 20px 0 0;
-        }
-
-        .stat-icon {
-            font-size: 1.5em;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .stat-value {
-            font-size: 1.9em;
-            font-weight: 800;
-            margin-top: 5px;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            background: linear-gradient(135deg, var(--light), #ccc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .food-count {
-            background: linear-gradient(135deg, var(--success), var(--success-dark));
-            color: white;
-            padding: 15px 25px;
-            border-radius: 20px;
-            margin: 20px 0;
-            font-weight: 700;
-            box-shadow: 0 8px 25px var(--success-glow);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            font-size: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .food-count:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px var(--success-glow);
-        }
-
-        .actions-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-            margin-bottom: 25px;
-        }
-
-        .btn {
-            padding: 20px;
-            border: none;
-            border-radius: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
-            color: white;
-        }
-
-        .btn-admin {
-            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-            color: var(--dark);
-            font-weight: 800;
-            margin: 20px 0;
-            width: 100%;
-            padding: 18px;
-            box-shadow: 0 6px 20px var(--gold-glow);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-        }
-
-        .btn:active {
-            transform: translateY(-1px);
-        }
-
-        .menu-section {
-            margin-top: 30px;
-        }
-
-        .menu-btn {
-            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-            color: white;
-            padding: 20px;
-            border: none;
-            border-radius: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .menu-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.5s;
-        }
-
-        .menu-btn:hover::before {
-            left: 100%;
-        }
-
-        .menu-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.5);
-        }
-
-        .info-text {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-            padding: 20px;
-            border-radius: 18px;
-            margin-top: 25px;
-            font-size: 14px;
-            color: #ccc;
-            line-height: 1.5;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            box-shadow: 
-                inset 0 1px 0 rgba(255, 255, 255, 0.05),
-                0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .admin-panel {
-            background: linear-gradient(145deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.95));
-            border-radius: 25px;
-            padding: 30px;
-            margin-top: 25px;
-            color: white;
-            display: none;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            box-shadow: 
-                0 15px 35px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        .admin-panel.active {
-            display: block;
-            animation: slideDown 0.4s ease-out;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-15px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .admin-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .admin-input {
-            padding: 14px 18px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .admin-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(139, 95, 191, 0.3);
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, var(--danger), #C0392B);
-            color: white;
-            margin-top: 15px;
-        }
-
-        .notification {
-            position: fixed;
-            top: 25px;
-            right: 25px;
-            padding: 18px 28px;
-            background: linear-gradient(135deg, var(--success), var(--success-dark));
-            color: white;
-            border-radius: 18px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-            z-index: 10000;
-            opacity: 0;
-            transform: translateX(100px) scale(0.9);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            font-weight: 600;
-            max-width: 350px;
-        }
-
-        .notification.show {
-            opacity: 1;
-            transform: translateX(0) scale(1);
-        }
-
-        .admin-header {
-            text-align: center;
-            margin-bottom: 25px;
-            color: var(--gold);
-            font-size: 1.4em;
-            text-shadow: 0 2px 15px var(--gold-glow);
-            font-weight: 700;
-            position: relative;
-        }
-
-        .admin-header::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 30%;
-            width: 40%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            border-radius: 1px;
-        }
-
-        /* Модальные окна */
-        .shop-modal, .confirm-modal, .inventory-modal, .withdraw-modal, .quests-modal, .referral-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .shop-modal.active, .confirm-modal.active, .inventory-modal.active, .withdraw-modal.active, .quests-modal.active, .referral-modal.active {
-            display: flex;
-        }
-
-        .shop-content, .confirm-content, .inventory-content, .withdraw-content, .quests-content, .referral-content {
-            background: linear-gradient(145deg, rgba(26, 26, 46, 0.98), rgba(22, 33, 62, 0.98));
-            backdrop-filter: blur(25px);
-            border-radius: 30px;
-            padding: 35px;
-            max-width: 520px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 
-                0 25px 50px rgba(0, 0, 0, 0.6),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.8) rotateX(10deg); }
-            to { opacity: 1; transform: scale(1) rotateX(0); }
-        }
-
-        .modal-header {
-            text-align: center;
-            margin-bottom: 25px;
-            color: var(--light);
-            font-size: 1.8em;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .shop-item {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-            padding: 25px;
-            border-radius: 20px;
-            margin: 18px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .shop-item:hover {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .inventory-item {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-            padding: 22px;
-            border-radius: 18px;
-            margin: 12px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .inventory-item:hover {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
-            transform: translateY(-2px);
-        }
-
-        .quest-item {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-            padding: 25px;
-            border-radius: 20px;
-            margin: 15px 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .quest-item:hover {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
-            transform: translateY(-2px);
-        }
-
-        .quest-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .quest-progress {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            height: 10px;
-            margin: 15px 0;
-            overflow: hidden;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .quest-progress-bar {
-            background: linear-gradient(135deg, var(--success), var(--accent));
-            height: 100%;
-            transition: width 0.5s ease;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.4);
-        }
-
-        .quest-reward {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 12px;
-            font-size: 14px;
-            color: var(--gold);
-            font-weight: 600;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--danger);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .close-btn:hover {
-            transform: rotate(90deg) scale(1.1);
-            background: #C0392B;
-            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
-        }
-
-        .confirm-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-            justify-content: center;
-        }
-
-        .dead-egg {
-            filter: grayscale(1) brightness(0.4);
-            opacity: 0.8;
-        }
-
-        .death-message {
-            color: var(--danger);
-            font-weight: 700;
-            margin: 15px 0;
-            text-shadow: 0 2px 15px rgba(231, 76, 60, 0.4);
-            font-size: 16px;
-            padding: 15px;
-            background: rgba(231, 76, 60, 0.1);
-            border-radius: 15px;
-            border: 1px solid rgba(231, 76, 60, 0.3);
-        }
-
-        .empty-inventory {
-            text-align: center;
-            padding: 50px 30px;
-            color: #999;
-        }
-
-        .empty-inventory h3 {
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            color: #ccc;
-        }
-
-        .withdraw-btn {
-            background: linear-gradient(135deg, var(--success), var(--success-dark));
-            color: white;
-            padding: 12px 22px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px var(--success-glow);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            font-weight: 600;
-        }
-
-        .withdraw-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px var(--success-glow);
-        }
-
-        .quest-btn {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 12px 22px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px var(--purple-glow);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            font-weight: 600;
-        }
-
-        .quest-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px var(--purple-glow);
-        }
-
-        .quest-btn:disabled {
-            background: #666;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .withdraw-log {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-            padding: 18px;
-            border-radius: 15px;
-            margin: 12px 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .withdraw-log:hover {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
-            transform: translateY(-2px);
-        }
-
-        .balance-info {
-            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-            color: var(--dark);
-            padding: 18px 25px;
-            border-radius: 20px;
-            margin: 20px 0;
-            font-weight: 700;
-            font-size: 14px;
-            text-align: center;
-            box-shadow: 0 6px 20px var(--gold-glow);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        /* Стили для прогресс-баров статистики */
-        .stat-progress {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            height: 8px;
-            margin-top: 10px;
-            overflow: hidden;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .hunger-progress {
-            background: linear-gradient(135deg, var(--success), var(--success-dark));
-            height: 100%;
-            border-radius: 12px;
-            transition: width 0.5s ease;
-            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.4);
-        }
-
-        .mood-progress {
-            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-            height: 100%;
-            border-radius: 12px;
-            transition: width 0.5s ease;
-            box-shadow: 0 2px 8px rgba(78, 205, 196, 0.4);
-        }
-
-        /* Улучшенные звезды в статистике */
-        .stars-display {
-            color: var(--gold);
-            text-shadow: 0 0 15px var(--gold-glow);
-        }
-
-        /* Адаптивность */
-        @media (max-width: 480px) {
-            .game-container {
-                padding: 25px 20px;
-                margin: 10px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .actions-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .header h1 {
-                font-size: 2.2em;
-            }
-            
-            .duck-frame {
-                width: 140px;
-                height: 140px;
-            }
+            background: rgba(26, 26, 46, 0.9); border-radius: 30px; padding: 35px 30px;
+            max-width: 450px; width: 100%; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .player-id { 
+            position: absolute; top: 20px; left: 20px; background: gold; padding: 8px 16px;
+            border-radius: 20px; font-size: 12px; font-weight: 700; color: black; 
+        }
+        .btn { 
+            padding: 15px; border: none; border-radius: 15px; font-weight: 700; cursor: pointer;
+            margin: 10px; width: 100%; color: white; font-size: 16px; 
+        }
+        .btn-primary { background: linear-gradient(135deg, #8B5FBF, #6B46C1); }
+        .btn-secondary { background: linear-gradient(135deg, #FF6B6B, #FF4757); }
+        .btn-admin { background: gold; color: black; display: none; }
+        
+        /* МОДАЛЬНЫЕ ОКНА */
+        .modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; 
+        }
+        .modal.active { display: flex; }
+        .modal-content { 
+            background: #1A1A2E; padding: 30px; border-radius: 20px; max-width: 400px; 
+            width: 90%; text-align: center; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .close-btn { 
+            position: absolute; top: 15px; right: 15px; background: red; color: white;
+            border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="floating-particles" id="particles"></div>
-    
     <div class="game-container">
-        <div class="container-glow"></div>
-        
         <div class="player-id">ID: <span id="playerId">Загрузка...</span></div>
         
-        <div class="header">
-            <h1>🦆 NFT Ducks</h1>
-            <div class="egg-display">
-                <div class="duck-frame">
-                    <img src="" alt="Утка" class="custom-duck" id="duckDisplay">
-                </div>
-                <div class="egg-type" id="eggTypeDisplay">❌ Нет утки</div>
-                <div class="timer" id="eggTimer">До вылупления: <span id="timerValue">17:00:00</span></div>
-                <button class="hatch-btn" id="hatchBtn">🎁 Получить предмет!</button>
-                <div id="deathMessage" class="death-message">💀 Утка умерла! Купите новую</div>
+        <h1>🦆 NFT Ducks</h1>
+        
+        <div class="egg-display">
+            <div style="width: 120px; height: 120px; margin: 20px auto; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center;">
+                <span id="duckStatus">❌</span>
+            </div>
+            <div id="eggTypeDisplay" style="background: #8B5FBF; color: white; padding: 10px 20px; border-radius: 20px; margin: 10px 0;">
+                Нет утки
+            </div>
+            <div id="deathMessage" style="color: red; display: none;">💀 Утка умерла!</div>
+        </div>
+        
+        <div id="foodCount" style="background: #27AE60; color: white; padding: 10px 20px; border-radius: 20px; margin: 10px 0;">
+            🍎 Еды: 0
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0;">
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px;">
+                <div>🍽️ Сытость</div>
+                <div id="hungerValue">0/100</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px;">
+                <div>😊 Настроение</div>
+                <div id="moodValue">0/100</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px;">
+                <div>⭐ Звёзды</div>
+                <div id="starsValue">0</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px;">
+                <div>🎒 Предметы</div>
+                <div id="itemsValue">0</div>
             </div>
         </div>
         
-        <div class="food-count" id="foodCount">🍎 Еды: 0</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0;">
+            <button class="btn btn-primary" onclick="feedDuck()">🍎 Покормить</button>
+            <button class="btn btn-secondary" onclick="playWithDuck()">🎮 Поиграть</button>
+        </div>
+
+        <button class="btn btn-admin" id="adminToggle" onclick="toggleAdminPanel()">🔧 Админ Панель</button>
         
-        <div class="stats-grid">
-            <div class="stat-card">
-                <span class="stat-icon">🍽️</span>
-                <div>Сытость</div>
-                <div class="stat-value" id="hungerValue">0/100</div>
-                <div class="stat-progress">
-                    <div class="hunger-progress" id="hungerProgress" style="width: 0%;"></div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <span class="stat-icon">😊</span>
-                <div>Настроение</div>
-                <div class="stat-value" id="moodValue">0/100</div>
-                <div class="stat-progress">
-                    <div class="mood-progress" id="moodProgress" style="width: 0%;"></div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <span class="stat-icon">⭐</span>
-                <div>Звёзды</div>
-                <div class="stat-value stars-display" id="starsValue">0</div>
-            </div>
-            <div class="stat-card">
-                <span class="stat-icon">🎒</span>
-                <div>Предметы</div>
-                <div class="stat-value" id="itemsValue">0</div>
-            </div>
-        </div>
-        
-        <div class="actions-grid">
-            <button class="btn btn-primary" id="feedBtn">
-                <span>🍎</span>
-                <span>Покормить</span>
-            </button>
-            <button class="btn btn-secondary" id="playBtn">
-                <span>🎮</span>
-                <span>Поиграть</span>
-            </button>
+        <div style="margin-top: 20px;">
+            <button class="btn btn-primary" onclick="openShop()">🛒 Магазин</button>
+            <button class="btn btn-primary" onclick="openInventory()">🎒 Инвентарь</button>
+            <button class="btn btn-primary" onclick="openQuests()">🎯 Задания</button>
+            <button class="btn btn-primary" onclick="openReferral()">👥 Реф система</button>
         </div>
 
-        <!-- Админ панель -->
-        <button class="btn btn-admin" id="adminToggle">
-            <span>🔧</span>
-            <span>Админ Панель</span>
-        </button>
-        
-        <div class="menu-section">
-            <button class="menu-btn" id="shopBtn">
-                <span>🛒</span>
-                <span>Магазин</span>
-            </button>
-            <button class="menu-btn" id="inventoryBtn">
-                <span>🎒</span>
-                <span>Инвентарь</span>
-            </button>
-            <button class="menu-btn" id="questsBtn">
-                <span>🎯</span>
-                <span>Задания</span>
-            </button>
-            <button class="menu-btn" id="referralBtn">
-                <span>👥</span>
-                <span>Реферальная система</span>
-            </button>
-        </div>
-
-        <div class="balance-info">
-            💎 Чтобы пополнить баланс, подарите подарок на аккаунт @NFT_c0llecti0n
-        </div>
-
-        <div class="info-text">
-            <strong>🎮 Ухаживайте за уткой!</strong><br>
-            Кормите и играйте с уткой, чтобы получить уникальные NFT-предметы
-        </div>
-
-        <div class="admin-panel" id="adminPanel">
-            <div class="admin-controls">
-                <div class="admin-header">🔧 Админ Панель</div>
-                
-                <input type="text" class="admin-input" placeholder="ID игрока" id="adminPlayerId">
-                <input type="number" class="admin-input" placeholder="Количество звёзд" id="adminStars">
-                
-                <button class="btn btn-admin" id="adminApply">✅ Выдать звёзды</button>
-                <button class="btn btn-danger" id="adminReset">🔄 Сбросить прогресс</button>
-                
-                <div class="admin-header" style="margin-top: 25px;">📊 Заявки на вывод</div>
-                <div id="withdrawRequests"></div>
-
-                <div class="admin-header" style="margin-top: 25px;">📋 Проверка заданий</div>
-                <input type="text" class="admin-input" placeholder="ID игрока" id="verifyPlayerId">
-                <select class="admin-input" id="verifyQuestType">
-                    <option value="subscribe">Подписка на канал</option>
-                </select>
-                <button class="btn btn-admin" id="verifyQuest">✅ Подтвердить задание</button>
-            </div>
+        <div id="adminPanel" style="display: none; margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px;">
+            <h3>🔧 Админ Панель</h3>
+            <input type="text" id="adminPlayerId" placeholder="ID игрока" style="width: 100%; padding: 10px; margin: 5px 0; border-radius: 10px; border: 1px solid #ccc;">
+            <input type="number" id="adminStars" placeholder="Звёзды" style="width: 100%; padding: 10px; margin: 5px 0; border-radius: 10px; border: 1px solid #ccc;">
+            <button class="btn btn-primary" onclick="adminGiveStars()">✅ Выдать звёзды</button>
         </div>
     </div>
 
-    <!-- Модальные окна -->
-    <div class="shop-modal" id="shopModal">
-        <div class="shop-content">
-            <button class="close-btn" id="closeShop">×</button>
-            <h2 class="modal-header">🛒 Магазин</h2>
+    <!-- МОДАЛЬНЫЕ ОКНА -->
+    <div class="modal" id="shopModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeShop()">×</button>
+            <h2>🛒 Магазин</h2>
             
-            <div class="shop-item">
-                <div>
-                    <strong>✨ Золотая утка</strong><br>
-                    <small>Шансы: Шампанское 50%, Календарик 25%, Tama Gadget 20%, Evil Eye 10%, Love Potion 5%</small>
-                </div>
-                <button class="btn btn-primary shop-buy-btn" data-type="gold_egg" data-cost="300">300 ⭐</button>
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; margin: 10px 0; border-radius: 15px;">
+                <div><strong>✨ Золотая утка - 300 ⭐</strong></div>
+                <button class="btn btn-primary" onclick="buyItem('gold_egg', 300)">Купить</button>
             </div>
             
-            <div class="shop-item">
-                <div>
-                    <strong>🍎 Еда (3 шт)</strong><br>
-                    <small>Пополните запас еды для кормления</small>
-                </div>
-                <button class="btn btn-primary shop-buy-btn" data-type="food" data-cost="15">15 ⭐</button>
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; margin: 10px 0; border-radius: 15px;">
+                <div><strong>🍎 Еда (3 шт) - 15 ⭐</strong></div>
+                <button class="btn btn-primary" onclick="buyItem('food', 15)">Купить</button>
             </div>
             
-            <div class="shop-item">
-                <div>
-                    <strong>🦆 Обычная утка</strong><br>
-                    <small>Шансы: Мишка 50%, Роза 25%, Календарик 5%</small>
-                </div>
-                <button class="btn btn-primary shop-buy-btn" data-type="normal_egg" data-cost="50">50 ⭐</button>
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; margin: 10px 0; border-radius: 15px;">
+                <div><strong>🦆 Обычная утка - 50 ⭐</strong></div>
+                <button class="btn btn-primary" onclick="buyItem('normal_egg', 50)">Купить</button>
             </div>
         </div>
     </div>
 
-    <div class="confirm-modal" id="confirmModal">
-        <div class="confirm-content">
-            <h3>Подтверждение покупки</h3>
-            <p id="confirmText">Вы уверены, что хотите купить этот предмет?</p>
-            <div class="confirm-buttons">
-                <button class="btn btn-secondary" id="cancelConfirm">Отмена</button>
-                <button class="btn btn-primary" id="confirmPurchaseBtn">Подтвердить</button>
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <h3>Подтверждение</h3>
+            <p id="confirmText">Вы уверены?</p>
+            <button class="btn btn-secondary" onclick="closeConfirm()">Отмена</button>
+            <button class="btn btn-primary" onclick="confirmPurchase()">Подтвердить</button>
+        </div>
+    </div>
+
+    <div class="modal" id="inventoryModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeInventory()">×</button>
+            <h2>🎒 Инвентарь</h2>
+            <div id="inventoryItems">Пусто</div>
+        </div>
+    </div>
+
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeWithdraw()">×</button>
+            <h2>📤 Вывод</h2>
+            <p>Предмет: <strong id="withdrawItemName"></strong></p>
+            <input type="text" id="telegramUsername" placeholder="@username" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 10px;">
+            <button class="btn btn-primary" onclick="submitWithdraw()">✅ Отправить</button>
+        </div>
+    </div>
+
+    <div class="modal" id="questsModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeQuests()">×</button>
+            <h2>🎯 Задания</h2>
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; margin: 10px 0; border-radius: 15px;">
+                <strong>📢 Подписка на канал</strong>
+                <p>Подпишитесь на @MyNFTPet</p>
+                <button class="btn btn-primary" onclick="openTelegram()">🔗 Перейти</button>
+                <button class="btn btn-primary" onclick="claimQuest()">🎁 Получить 10⭐</button>
             </div>
         </div>
     </div>
 
-    <div class="inventory-modal" id="inventoryModal">
-        <div class="inventory-content">
-            <button class="close-btn" id="closeInventory">×</button>
-            <h2 class="modal-header">🎒 Инвентарь</h2>
-            <div id="inventoryItems"></div>
+    <div class="modal" id="referralModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeReferral()">×</button>
+            <h2>👥 Реферальная система</h2>
+            <p style="color: orange;">⚠️ Временно закрыта</p>
         </div>
     </div>
-
-    <div class="withdraw-modal" id="withdrawModal">
-        <div class="withdraw-content">
-            <button class="close-btn" id="closeWithdraw">×</button>
-            <h2 class="modal-header">📤 Заявка на вывод</h2>
-            <div class="info-text">
-                <p>Вы хотите вывести предмет: <strong id="withdrawItemName"></strong></p>
-                <p>Напишите ваш Telegram username для связи:</p>
-                <input type="text" class="admin-input" id="telegramUsername" placeholder="@username">
-                <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" id="submitWithdraw">✅ Отправить заявку</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="quests-modal" id="questsModal">
-        <div class="quests-content">
-            <button class="close-btn" id="closeQuests">×</button>
-            <h2 class="modal-header">🎯 Задания</h2>
-            <div id="questsList"></div>
-        </div>
-    </div>
-
-    <div class="referral-modal" id="referralModal">
-        <div class="referral-content">
-            <button class="close-btn" id="closeReferral">×</button>
-            <h2 class="modal-header">👥 Реферальная система</h2>
-            <div class="info-text">
-                <p style="text-align: center; color: var(--warning); font-weight: bold;">
-                    ⚠️ Реферальная система временно закрыта
-                </p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="notification" id="notification"></div>
 
     <script>
-        // ========== КОНФИГУРАЦИЯ ==========
-        const SUPABASE_URL = 'https://ovnukmhlpjuirmlijvqq.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bnVrbWhscGp1aXJtbGlqdnFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Njc0NDMsImV4cCI6MjA3NzE0MzQ0M30.t0sNQiamZE5pbdptekj742d8zMexLst5LOI6b0yQ_Cw';
-        const ADMIN_USER_ID = "USER_1761399526979_swpx4n20o";
-
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
+        // ПРОСТЫЕ ДАННЫЕ ИГРОКА
         let playerData = {
             id: '',
             hunger: 0,
@@ -1180,292 +187,96 @@
             items: [],
             currentEgg: null,
             foodCount: 0,
-            isAlive: false,
-            eggHatchTime: null,
-            isEggReady: false,
-            hasReceivedInitialFood: false,
-            quests: { subscribe: { completed: false, claimed: false } },
-            lastStatDecrease: Date.now()
+            isAlive: false
         };
 
-        let currentWithdrawItem = null;
         let currentPurchase = null;
-        let isAdmin = false;
+        let currentWithdrawItem = null;
 
-        const eggItems = {
-            normal_egg: [
-                { name: "🐻 Мишка", chance: 50 },
-                { name: "🌹 Роза", chance: 25 },
-                { name: "📅 Календарик", chance: 5 }
-            ],
-            gold_egg: [
-                { name: "🍾 Шампанское", chance: 50 },
-                { name: "📅 Календарик", chance: 25 },
-                { name: "📱 Tama Gadget", chance: 20 },
-                { name: "👁️ Evil Eye", chance: 10 },
-                { name: "🧪 Love Potion", chance: 5 }
-            ]
-        };
-
-        // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
-        function generatePlayerId() {
-            let playerId = localStorage.getItem('playerId');
-            if (!playerId) {
-                playerId = 'USER_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('playerId', playerId);
-            }
-            return playerId;
-        }
-
-        async function loadPlayerData() {
-            playerData.id = generatePlayerId();
+        // ИНИЦИАЛИЗАЦИЯ ИГРЫ
+        function initGame() {
+            console.log("Игра запускается...");
+            
+            // Генерируем ID
+            playerData.id = 'USER_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             document.getElementById('playerId').textContent = playerData.id;
             
-            if (!localStorage.getItem('reset_done_v4')) {
-                localStorage.clear();
-                localStorage.setItem('reset_done_v4', 'true');
-                playerData.foodCount = 3;
-                playerData.hasReceivedInitialFood = true;
-                showNotification('🎁 Добро пожаловать! Вы получили 3 единицы еды!');
-            } else {
-                const saved = localStorage.getItem('playerData_' + playerData.id);
-                if (saved) {
-                    Object.assign(playerData, JSON.parse(saved));
-                }
+            // Даем начальную еду
+            playerData.foodCount = 3;
+            
+            // Проверяем админа
+            if (playerData.id === "USER_1761399526979_swpx4n20o") {
+                document.getElementById('adminToggle').style.display = 'block';
             }
             
-            try {
-                const { data } = await supabase
-                    .from('players')
-                    .select('*')
-                    .eq('player_id', playerData.id)
-                    .single();
-                if (data) Object.assign(playerData, data.player_data);
-            } catch (error) {
-                console.log('Supabase недоступен');
-            }
+            updateUI();
+            showNotification('🎉 Добро пожаловать!');
         }
 
-        async function savePlayerData() {
-            localStorage.setItem('playerData_' + playerData.id, JSON.stringify(playerData));
-            try {
-                await supabase.from('players').upsert({
-                    player_id: playerData.id,
-                    player_data: playerData,
-                    last_updated: new Date().toISOString()
-                });
-            } catch (error) {
-                console.log('Ошибка сохранения');
-            }
-        }
-
+        // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
         function updateUI() {
             document.getElementById('hungerValue').textContent = playerData.hunger + '/100';
             document.getElementById('moodValue').textContent = playerData.mood + '/100';
             document.getElementById('starsValue').textContent = playerData.stars;
             document.getElementById('itemsValue').textContent = playerData.items.length;
             document.getElementById('foodCount').textContent = '🍎 Еды: ' + playerData.foodCount;
-            
-            document.getElementById('hungerProgress').style.width = playerData.hunger + '%';
-            document.getElementById('moodProgress').style.width = playerData.mood + '%';
-            
-            const duckDisplay = document.getElementById('duckDisplay');
-            const eggTypeDisplay = document.getElementById('eggTypeDisplay');
-            const deathMessage = document.getElementById('deathMessage');
-            const hatchBtn = document.getElementById('hatchBtn');
-            const eggTimer = document.getElementById('eggTimer');
-            
+
             if (!playerData.isAlive) {
-                duckDisplay.src = '';
-                eggTypeDisplay.textContent = '💀 Утка умерла';
-                deathMessage.style.display = 'block';
-                hatchBtn.style.display = 'none';
-                eggTimer.style.display = 'none';
+                document.getElementById('duckStatus').textContent = '💀';
+                document.getElementById('eggTypeDisplay').textContent = 'Утка умерла';
+                document.getElementById('deathMessage').style.display = 'block';
             } else if (playerData.currentEgg) {
-                if (playerData.currentEgg.type === 'gold_egg') {
-                    duckDisplay.src = 'https://i.ibb.co/B5czcMk3/image.png';
-                    eggTypeDisplay.textContent = '✨ Золотая утка';
-                } else {
-                    duckDisplay.src = 'https://i.ibb.co/99bLxfGr/image.png';
-                    eggTypeDisplay.textContent = '🦆 Обычная утка';
-                }
-                deathMessage.style.display = 'none';
-                
-                if (playerData.isEggReady) {
-                    hatchBtn.style.display = 'block';
-                    eggTimer.style.display = 'none';
-                } else {
-                    hatchBtn.style.display = 'none';
-                    eggTimer.style.display = 'block';
-                    updateHatchTimer();
-                }
+                document.getElementById('duckStatus').textContent = '🥚';
+                document.getElementById('eggTypeDisplay').textContent = playerData.currentEgg.type === 'gold_egg' ? '✨ Золотая утка' : '🦆 Обычная утка';
+                document.getElementById('deathMessage').style.display = 'none';
             } else {
-                duckDisplay.src = '';
-                eggTypeDisplay.textContent = '❌ Нет утки';
-                deathMessage.style.display = 'none';
-                hatchBtn.style.display = 'none';
-                eggTimer.style.display = 'none';
-            }
-            
-            document.getElementById('feedBtn').disabled = !playerData.isAlive || playerData.foodCount <= 0;
-            document.getElementById('playBtn').disabled = !playerData.isAlive;
-            
-            // Админ панель
-            if (playerData.id === ADMIN_USER_ID) {
-                isAdmin = true;
-                document.getElementById('adminToggle').style.display = 'block';
-            } else {
-                document.getElementById('adminToggle').style.display = 'none';
+                document.getElementById('duckStatus').textContent = '❌';
+                document.getElementById('eggTypeDisplay').textContent = 'Нет утки';
+                document.getElementById('deathMessage').style.display = 'none';
             }
         }
 
-        // ========== УХОД ЗА УТКОЙ ==========
+        // УХОД ЗА УТКОЙ
         function feedDuck() {
+            console.log("Кормление утки...");
             if (!playerData.isAlive) {
-                showNotification('❌ Утка умерла! Купите новую утку.');
+                showNotification('❌ Утка умерла! Купите новую.');
                 return;
             }
             if (playerData.foodCount <= 0) {
-                showNotification('❌ Недостаточно еды! Купите еду в магазине.');
+                showNotification('❌ Нет еды!');
                 return;
             }
             playerData.hunger = Math.min(100, playerData.hunger + 14);
             playerData.foodCount--;
-            savePlayerData();
             updateUI();
-            showNotification('🍎 Утка покормлена! +14 к сытости');
+            showNotification('🍎 +14 к сытости');
             checkDeath();
         }
 
         function playWithDuck() {
+            console.log("Игра с уткой...");
             if (!playerData.isAlive) {
-                showNotification('❌ Утка умерла! Купите новую утку.');
+                showNotification('❌ Утка умерла!');
                 return;
             }
             playerData.mood = Math.min(100, playerData.mood + 10);
-            savePlayerData();
             updateUI();
-            showNotification('🎮 Вы поиграли с уткой! +10 к настроению');
-        }
-
-        function startStatDecrease() {
-            setInterval(() => {
-                if (!playerData.isAlive || !playerData.currentEgg) return;
-                const now = Date.now();
-                const hoursPassed = (now - playerData.lastStatDecrease) / (1000 * 60 * 60);
-                if (hoursPassed >= 1) {
-                    playerData.hunger = Math.max(0, playerData.hunger - 10);
-                    playerData.mood = Math.max(0, playerData.mood - 8);
-                    playerData.lastStatDecrease = now;
-                    savePlayerData();
-                    updateUI();
-                    checkDeath();
-                }
-            }, 60000);
+            showNotification('🎮 +10 к настроению');
         }
 
         function checkDeath() {
             if ((playerData.hunger <= 0 || playerData.mood <= 0) && playerData.isAlive) {
                 playerData.isAlive = false;
                 playerData.currentEgg = null;
-                playerData.isEggReady = false;
-                playerData.eggHatchTime = null;
-                savePlayerData();
                 updateUI();
-                showNotification('💀 Утка умерла! Купите новую утку.');
+                showNotification('💀 Утка умерла!');
             }
         }
 
-        // ========== СИСТЕМА ЯИЦ ==========
-        function buyEgg(eggType, cost) {
-            playerData.stars -= cost;
-            playerData.currentEgg = { type: eggType, startTime: Date.now() };
-            playerData.isAlive = true;
-            playerData.hunger = 100;
-            playerData.mood = 100;
-            playerData.isEggReady = false;
-            playerData.eggHatchTime = Date.now() + (17 * 60 * 60 * 1000);
-            savePlayerData();
-            updateUI();
-            showNotification('🎉 Вы купили утку! Она вылупится через 17 часов.');
-            startHatchTimer();
-        }
-
-        function startHatchTimer() {
-            if (!playerData.eggHatchTime || playerData.isEggReady) return;
-            const timer = setInterval(() => {
-                if (playerData.isEggReady || !playerData.eggHatchTime) {
-                    clearInterval(timer);
-                    return;
-                }
-                const now = Date.now();
-                const timeLeft = playerData.eggHatchTime - now;
-                if (timeLeft <= 0) {
-                    playerData.isEggReady = true;
-                    savePlayerData();
-                    updateUI();
-                    showNotification('🎊 Яйцо готово к вылуплению!');
-                    clearInterval(timer);
-                } else {
-                    updateHatchTimer();
-                }
-            }, 1000);
-        }
-
-        function updateHatchTimer() {
-            if (!playerData.eggHatchTime) return;
-            const now = Date.now();
-            const timeLeft = playerData.eggHatchTime - now;
-            if (timeLeft <= 0) {
-                playerData.isEggReady = true;
-                savePlayerData();
-                updateUI();
-                return;
-            }
-            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-            document.getElementById('timerValue').textContent = 
-                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        function hatchEgg() {
-            if (!playerData.isEggReady || !playerData.currentEgg) {
-                showNotification('❌ Яйцо еще не готово!');
-                return;
-            }
-            const eggType = playerData.currentEgg.type;
-            const items = eggItems[eggType];
-            const random = Math.random() * 100;
-            let currentChance = 0;
-            let randomItem = items[items.length - 1];
-            
-            for (const item of items) {
-                currentChance += item.chance;
-                if (random <= currentChance) {
-                    randomItem = item;
-                    break;
-                }
-            }
-            
-            playerData.items.push({
-                id: 'item_' + Date.now(),
-                name: randomItem.name,
-                type: eggType
-            });
-            
-            playerData.currentEgg = null;
-            playerData.isEggReady = false;
-            playerData.eggHatchTime = null;
-            playerData.isAlive = false;
-            
-            savePlayerData();
-            updateUI();
-            showNotification(`🎁 Вы получили: ${randomItem.name}`);
-        }
-
-        // ========== МАГАЗИН ==========
+        // МАГАЗИН
         function openShop() {
+            console.log("Открываем магазин...");
             document.getElementById('shopModal').classList.add('active');
         }
 
@@ -1474,28 +285,19 @@
         }
 
         function buyItem(itemType, cost) {
+            console.log("Покупаем:", itemType);
             currentPurchase = { itemType, cost };
-            document.getElementById('confirmText').textContent = 
-                `Вы уверены, что хотите купить ${getItemName(itemType)} за ${cost} звёзд?`;
+            document.getElementById('confirmText').textContent = `Купить за ${cost}⭐?`;
             document.getElementById('confirmModal').classList.add('active');
-        }
-
-        function getItemName(itemType) {
-            const names = {
-                'gold_egg': 'Золотую утку',
-                'normal_egg': 'Обычную утку', 
-                'food': '3 единицы еды'
-            };
-            return names[itemType] || 'предмет';
         }
 
         function closeConfirm() {
             document.getElementById('confirmModal').classList.remove('active');
-            currentPurchase = null;
         }
 
-        async function confirmPurchase() {
+        function confirmPurchase() {
             if (!currentPurchase) return;
+            
             const { itemType, cost } = currentPurchase;
             
             if (playerData.stars < cost) {
@@ -1504,43 +306,42 @@
                 return;
             }
             
+            playerData.stars -= cost;
+            
             if (itemType === 'food') {
-                playerData.stars -= cost;
                 playerData.foodCount += 3;
-                showNotification('🎉 Вы купили 3 единицы еды!');
+                showNotification('🎉 Куплено 3 еды!');
             } else {
-                buyEgg(itemType, cost);
+                // Покупаем утку
+                playerData.currentEgg = { type: itemType };
+                playerData.isAlive = true;
+                playerData.hunger = 100;
+                playerData.mood = 100;
+                showNotification('🎉 Куплена утка!');
             }
             
-            await savePlayerData();
             updateUI();
             closeConfirm();
             closeShop();
         }
 
-        // ========== ИНВЕНТАРЬ И ВЫВОД ==========
+        // ИНВЕНТАРЬ И ВЫВОД
         function openInventory() {
-            const inventoryItems = document.getElementById('inventoryItems');
+            console.log("Открываем инвентарь...");
+            const itemsDiv = document.getElementById('inventoryItems');
+            
             if (playerData.items.length === 0) {
-                inventoryItems.innerHTML = '<div class="empty-inventory"><h3>🎒 Инвентарь пуст</h3></div>';
+                itemsDiv.innerHTML = '<p>Инвентарь пуст</p>';
             } else {
                 let html = '';
                 playerData.items.forEach((item, index) => {
-                    html += `
-                        <div class="inventory-item">
-                            <div><strong>${item.name}</strong></div>
-                            <button class="withdraw-btn" data-index="${index}">📤 Вывод</button>
-                        </div>
-                    `;
+                    html += `<div style="background: rgba(255,255,255,0.1); padding: 10px; margin: 5px 0; border-radius: 10px;">
+                        ${item.name} <button onclick="startWithdraw(${index})" style="background: #27AE60; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-left: 10px;">Вывод</button>
+                    </div>`;
                 });
-                inventoryItems.innerHTML = html;
-                
-                document.querySelectorAll('.withdraw-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        openWithdraw(parseInt(this.getAttribute('data-index')));
-                    });
-                });
+                itemsDiv.innerHTML = html;
             }
+            
             document.getElementById('inventoryModal').classList.add('active');
         }
 
@@ -1548,87 +349,35 @@
             document.getElementById('inventoryModal').classList.remove('active');
         }
 
-        function openWithdraw(itemIndex) {
-            const item = playerData.items[itemIndex];
+        function startWithdraw(itemIndex) {
             currentWithdrawItem = itemIndex;
+            const item = playerData.items[itemIndex];
             document.getElementById('withdrawItemName').textContent = item.name;
-            document.getElementById('telegramUsername').value = '';
             document.getElementById('withdrawModal').classList.add('active');
         }
 
         function closeWithdraw() {
             document.getElementById('withdrawModal').classList.remove('active');
-            currentWithdrawItem = null;
         }
 
-        async function submitWithdraw() {
-            const telegram = document.getElementById('telegramUsername').value.trim();
-            if (!telegram || !telegram.startsWith('@')) {
-                showNotification('❌ Введите корректный Telegram username (@username)');
+        function submitWithdraw() {
+            const telegram = document.getElementById('telegramUsername').value;
+            if (!telegram) {
+                showNotification('❌ Введите Telegram!');
                 return;
             }
-
-            const item = playerData.items[currentWithdrawItem];
-            try {
-                const { error } = await supabase.from('withdraw_requests').insert([{
-                    player_id: playerData.id,
-                    item_name: item.name,
-                    telegram: telegram,
-                    item_id: item.id,
-                    status: 'pending'
-                }]);
-
-                if (!error) {
-                    playerData.items.splice(currentWithdrawItem, 1);
-                    await savePlayerData();
-                    updateUI();
-                    closeWithdraw();
-                    closeInventory();
-                    showNotification('✅ Заявка отправлена!');
-                }
-            } catch (error) {
-                showNotification('❌ Ошибка отправки заявки');
-            }
+            
+            // Удаляем предмет из инвентаря
+            playerData.items.splice(currentWithdrawItem, 1);
+            updateUI();
+            closeWithdraw();
+            closeInventory();
+            showNotification('✅ Заявка отправлена!');
         }
 
-        // ========== ЗАДАНИЯ ==========
+        // ЗАДАНИЯ
         function openQuests() {
-            const questsList = document.getElementById('questsList');
-            const quest = playerData.quests.subscribe;
-            questsList.innerHTML = `
-                <div class="quest-item">
-                    <div class="quest-header">
-                        <strong>📢 Подписка на канал</strong>
-                        ${quest.claimed ? 
-                            '<span style="color: #27ae60;">✅ Выполнено</span>' : 
-                            (quest.completed ? 
-                                '<button class="quest-btn" id="claimQuest">🎁 Получить награду</button>' :
-                                '<div><button class="quest-btn" id="openChannel">🔗 Перейти в канал</button>' +
-                                '<button class="quest-btn" id="checkSubscribe">✅ Проверить подписку</button></div>'
-                            )
-                        }
-                    </div>
-                    <p>Подпишитесь на наш Telegram канал @MyNFTPet</p>
-                    <div class="quest-reward">🎁 Награда: 10 ⭐ Звёзды</div>
-                </div>
-            `;
-
-            if (document.getElementById('openChannel')) {
-                document.getElementById('openChannel').addEventListener('click', () => {
-                    window.open('https://t.me/MyNFTPet', '_blank');
-                });
-            }
-            if (document.getElementById('checkSubscribe')) {
-                document.getElementById('checkSubscribe').addEventListener('click', () => {
-                    showNotification('🔍 Проверка подписки...');
-                });
-            }
-            if (document.getElementById('claimQuest')) {
-                document.getElementById('claimQuest').addEventListener('click', () => {
-                    claimQuestReward('subscribe');
-                });
-            }
-
+            console.log("Открываем задания...");
             document.getElementById('questsModal').classList.add('active');
         }
 
@@ -1636,21 +385,20 @@
             document.getElementById('questsModal').classList.remove('active');
         }
 
-        function claimQuestReward(questType) {
-            if (playerData.quests[questType].claimed) {
-                showNotification('❌ Вы уже получили награду!');
-                return;
-            }
+        function openTelegram() {
+            window.open('https://t.me/MyNFTPet', '_blank');
+        }
+
+        function claimQuest() {
             playerData.stars += 10;
-            playerData.quests[questType].claimed = true;
-            savePlayerData();
             updateUI();
-            showNotification('🎉 Вы получили 10 звёзд!');
+            showNotification('🎉 Получено 10 звёзд!');
             closeQuests();
         }
 
-        // ========== РЕФЕРАЛЬНАЯ СИСТЕМА ==========
+        // РЕФЕРАЛЬНАЯ СИСТЕМА
         function openReferral() {
+            console.log("Открываем реф систему...");
             document.getElementById('referralModal').classList.add('active');
         }
 
@@ -1658,169 +406,38 @@
             document.getElementById('referralModal').classList.remove('active');
         }
 
-        // ========== АДМИН ПАНЕЛЬ ==========
+        // АДМИН ПАНЕЛЬ
         function toggleAdminPanel() {
-            document.getElementById('adminPanel').classList.toggle('active');
-            if (document.getElementById('adminPanel').classList.contains('active')) {
-                updateWithdrawRequests();
-            }
+            const panel = document.getElementById('adminPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
         }
 
-        async function adminGiveStars() {
-            if (!isAdmin) {
-                showNotification('❌ Доступ запрещен!');
-                return;
-            }
-            const playerId = document.getElementById('adminPlayerId').value.trim();
+        function adminGiveStars() {
+            const playerId = document.getElementById('adminPlayerId').value;
             const stars = parseInt(document.getElementById('adminStars').value);
             
             if (!playerId || isNaN(stars)) {
-                showNotification('❌ Заполните все поля!');
+                showNotification('❌ Заполните поля!');
                 return;
             }
-
-            try {
-                const { data } = await supabase
-                    .from('players')
-                    .select('*')
-                    .eq('player_id', playerId)
-                    .single();
-
-                if (!data) {
-                    showNotification('❌ Игрок не найден!');
-                    return;
-                }
-
-                const playerDataFromDB = data.player_data;
-                playerDataFromDB.stars = (playerDataFromDB.stars || 0) + stars;
-                
-                await supabase.from('players').update({
-                    player_data: playerDataFromDB
-                }).eq('player_id', playerId);
-
-                if (playerId === playerData.id) {
-                    playerData.stars += stars;
-                    updateUI();
-                }
-                
-                showNotification(`✅ Выдано ${stars} звёзд игроку ${playerId}`);
-                document.getElementById('adminPlayerId').value = '';
-                document.getElementById('adminStars').value = '';
-            } catch (error) {
-                showNotification('❌ Ошибка выдачи звёзд');
+            
+            if (playerId === playerData.id) {
+                playerData.stars += stars;
+                updateUI();
             }
+            
+            showNotification(`✅ Выдано ${stars} звёзд игроку ${playerId}`);
+            document.getElementById('adminPlayerId').value = '';
+            document.getElementById('adminStars').value = '';
         }
 
-        async function updateWithdrawRequests() {
-            if (!isAdmin) return;
-            const container = document.getElementById('withdrawRequests');
-            try {
-                const { data } = await supabase
-                    .from('withdraw_requests')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (!data || data.length === 0) {
-                    container.innerHTML = '<div class="info-text">Нет заявок на вывод</div>';
-                    return;
-                }
-
-                let html = '';
-                data.forEach(request => {
-                    html += `
-                        <div class="withdraw-log">
-                            <strong>👤 ID:</strong> ${request.player_id}<br>
-                            <strong>🎁 Предмет:</strong> ${request.item_name}<br>
-                            <strong>📱 Telegram:</strong> ${request.telegram}<br>
-                            <button class="withdraw-btn" onclick="completeWithdraw('${request.id}')">✅ Выполнено</button>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            } catch (error) {
-                container.innerHTML = '<div class="info-text">Ошибка загрузки</div>';
-            }
-        }
-
-        async function completeWithdraw(requestId) {
-            if (!isAdmin) return;
-            try {
-                await supabase.from('withdraw_requests').delete().eq('id', requestId);
-                await updateWithdrawRequests();
-                showNotification('✅ Заявка выполнена!');
-            } catch (error) {
-                showNotification('❌ Ошибка выполнения заявки');
-            }
-        }
-
-        // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
+        // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
         function showNotification(message) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.classList.add('show');
-            setTimeout(() => notification.classList.remove('show'), 3000);
+            alert(message); // Простой alert вместо сложного уведомления
         }
 
-        function createParticles() {
-            const container = document.getElementById('particles');
-            for (let i = 0; i < 15; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.cssText = `
-                    width: ${Math.random() * 6 + 2}px;
-                    height: ${Math.random() * 6 + 2}px;
-                    left: ${Math.random() * 100}%;
-                    top: ${Math.random() * 100}%;
-                    background: var(--${['primary', 'accent', 'gold', 'secondary'][Math.floor(Math.random() * 4)]});
-                    animation-delay: ${Math.random() * 20}s;
-                    animation-duration: ${Math.random() * 10 + 15}s;
-                `;
-                container.appendChild(particle);
-            }
-        }
-
-        // ========== ИНИЦИАЛИЗАЦИЯ ==========
-        async function initGame() {
-            createParticles();
-            await loadPlayerData();
-            updateUI();
-            startStatDecrease();
-
-            // Назначаем обработчики событий
-            document.getElementById('feedBtn').onclick = feedDuck;
-            document.getElementById('playBtn').onclick = playWithDuck;
-            document.getElementById('hatchBtn').onclick = hatchEgg;
-
-            document.getElementById('shopBtn').onclick = openShop;
-            document.getElementById('inventoryBtn').onclick = openInventory;
-            document.getElementById('questsBtn').onclick = openQuests;
-            document.getElementById('referralBtn').onclick = openReferral;
-
-            document.getElementById('adminToggle').onclick = toggleAdminPanel;
-            document.getElementById('adminApply').onclick = adminGiveStars;
-
-            document.getElementById('closeShop').onclick = closeShop;
-            document.getElementById('closeInventory').onclick = closeInventory;
-            document.getElementById('closeQuests').onclick = closeQuests;
-            document.getElementById('closeReferral').onclick = closeReferral;
-            document.getElementById('closeWithdraw').onclick = closeWithdraw;
-
-            document.getElementById('cancelConfirm').onclick = closeConfirm;
-            document.getElementById('confirmPurchaseBtn').onclick = confirmPurchase;
-            document.getElementById('submitWithdraw').onclick = submitWithdraw;
-
-            // Обработчики для кнопок покупки
-            document.querySelectorAll('.shop-buy-btn').forEach(btn => {
-                btn.onclick = function() {
-                    buyItem(this.getAttribute('data-type'), parseInt(this.getAttribute('data-cost')));
-                };
-            });
-
-            console.log('Игра инициализирована!');
-        }
-
-        // Запускаем игру когда страница полностью загружена
-        window.addEventListener('DOMContentLoaded', initGame);
+        // ЗАПУСКАЕМ ИГРУ ПРИ ЗАГРУЗКЕ
+        window.onload = initGame;
     </script>
 </body>
 </html>
