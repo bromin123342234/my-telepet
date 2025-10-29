@@ -6,7 +6,6 @@
     <title>🥚 NFT Duck Eggs | Коллекционные утки</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* ВАШИ СТИЛИ ОСТАЮТСЯ БЕЗ ИЗМЕНЕНИЙ */
         * {
             margin: 0;
             padding: 0;
@@ -959,6 +958,10 @@
             none: "https://i.ibb.co/6W3s8y0/duck-default.png"
         };
 
+        // ВРЕМЯ ВЫЛУПЛЕНИЯ В МИЛЛИСЕКУНДАХ
+        const HATCH_TIME_NORMAL = 17 * 60 * 60 * 1000; // 17 часов
+        const HATCH_TIME_GOLD = 32 * 60 * 60 * 1000; // 32 часа
+
         let supabase;
         let playerData = {
             id: '',
@@ -969,7 +972,9 @@
             current_egg: null,
             food_count: 3,
             is_alive: false,
-            last_stat_decrease: new Date().toISOString()
+            last_stat_decrease: new Date().toISOString(),
+            egg_purchase_time: null,
+            egg_type: null
         };
 
         let currentPurchase = null;
@@ -982,8 +987,16 @@
             try {
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 await setupPlayerId();
+                
+                // ПРОВЕРЯЕМ ВЫЛУПЛЕНИЕ УТКИ ПРИ ЗАГРУЗКЕ
+                await checkEggHatching();
+                
                 updateUI();
                 showNotification('🎉 Добро пожаловать!');
+                
+                // ЗАПУСКАЕМ ФОНОВУЮ ПРОВЕРКУ ВЫЛУПЛЕНИЯ
+                setInterval(checkEggHatching, 60000); // Проверка каждую минуту
+                
             } catch (error) {
                 console.error('Ошибка инициализации:', error);
                 showNotification('❌ Ошибка загрузки игры');
@@ -1022,8 +1035,10 @@
                     playerData.items = data.items || [];
                     playerData.current_egg = data.current_egg || null;
                     playerData.food_count = data.food_count !== null ? data.food_count : 3;
-                    playerData.is_alive = data.current_egg !== null; // Утка жива если есть яйцо
+                    playerData.is_alive = data.is_alive || false;
                     playerData.last_stat_decrease = data.last_stat_decrease || new Date().toISOString();
+                    playerData.egg_purchase_time = data.egg_purchase_time || null;
+                    playerData.egg_type = data.egg_type || null;
                     
                     console.log("✅ Данные загружены:", playerData);
                 }
@@ -1048,7 +1063,9 @@
                 current_egg: playerData.current_egg,
                 food_count: playerData.food_count,
                 is_alive: playerData.is_alive,
-                last_stat_decrease: playerData.last_stat_decrease
+                last_stat_decrease: playerData.last_stat_decrease,
+                egg_purchase_time: playerData.egg_purchase_time,
+                egg_type: playerData.egg_type
             };
 
             const { error } = await supabase
@@ -1076,8 +1093,10 @@
                         items: playerData.items,
                         current_egg: playerData.current_egg,
                         food_count: playerData.food_count,
-                        is_alive: playerData.current_egg !== null, // Утка жива если есть яйцо
-                        last_stat_decrease: playerData.last_stat_decrease
+                        is_alive: playerData.is_alive,
+                        last_stat_decrease: playerData.last_stat_decrease,
+                        egg_purchase_time: playerData.egg_purchase_time,
+                        egg_type: playerData.egg_type
                     }]);
 
                 if (error) {
@@ -1091,89 +1110,72 @@
             }
         }
 
-        // ЗАГРУЗКА ВСЕХ ИГРОКОВ (ДЛЯ АДМИНА)
-        async function loadAllPlayers() {
-            try {
-                const { data, error } = await supabase
-                    .from('players')
-                    .select('*')
-                    .order('stars', { ascending: false });
-
-                if (error) {
-                    console.error('Ошибка загрузки игроков:', error);
-                    document.getElementById('allPlayers').innerHTML = '<div class="info-text">Ошибка загрузки игроков</div>';
-                    return;
-                }
-
-                let html = '';
-                if (data && data.length > 0) {
-                    data.forEach((player, index) => {
-                        html += `
-                            <div class="player-list-item">
-                                <strong>#${index + 1}</strong><br>
-                                <strong>ID:</strong> ${player.user_id}<br>
-                                <strong>Звёзды:</strong> ${player.stars || 0}<br>
-                                <strong>Утка:</strong> ${player.current_egg ? 'Жива' : 'Нет'}<br>
-                                <strong>Предметы:</strong> ${player.items ? player.items.length : 0}
-                                <button class="btn btn-primary" style="margin-top: 10px; padding: 8px 16px;" onclick="adminAddStars('${player.user_id}', 10)">
-                                    +10 ⭐
-                                </button>
-                                <button class="btn btn-primary" style="margin-top: 10px; padding: 8px 16px;" onclick="adminAddStars('${player.user_id}', 50)">
-                                    +50 ⭐
-                                </button>
-                            </div>
-                        `;
-                    });
-                } else {
-                    html = '<div class="info-text">Нет игроков в базе</div>';
-                }
-                document.getElementById('allPlayers').innerHTML = html;
-            } catch (error) {
-                console.error('Ошибка загрузки игроков:', error);
-                document.getElementById('allPlayers').innerHTML = '<div class="info-text">Ошибка подключения</div>';
+        // ПРОВЕРКА ВЫЛУПЛЕНИЯ ЯЙЦА
+        async function checkEggHatching() {
+            if (!playerData.current_egg || !playerData.egg_purchase_time) {
+                return; // Нет яйца или времени покупки
+            }
+            
+            const purchaseTime = new Date(playerData.egg_purchase_time).getTime();
+            const currentTime = new Date().getTime();
+            const timePassed = currentTime - purchaseTime;
+            
+            let hatchTimeRequired = HATCH_TIME_NORMAL;
+            if (playerData.egg_type === 'gold_egg') {
+                hatchTimeRequired = HATCH_TIME_GOLD;
+            }
+            
+            // Если время вылупления прошло
+            if (timePassed >= hatchTimeRequired) {
+                await hatchEgg();
             }
         }
 
-        // ЗАГРУЗКА ЗАЯВОК НА ВЫВОД
-        async function loadWithdrawRequests() {
-            try {
-                const { data, error } = await supabase
-                    .from('withdraw_requests')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) {
-                    console.error('Ошибка загрузки заявок:', error);
-                    document.getElementById('withdrawRequests').innerHTML = '<div class="info-text">Ошибка загрузки заявок</div>';
-                    return;
-                }
-
-                let html = '';
-                if (data && data.length > 0) {
-                    data.forEach((request) => {
-                        html += `
-                            <div class="withdraw-request-item">
-                                <strong>Игрок:</strong> ${request.player_id}<br>
-                                <strong>Предмет:</strong> ${request.item_name}<br>
-                                <strong>Telegram:</strong> ${request.telegram}<br>
-                                <strong>Время:</strong> ${new Date(request.created_at).toLocaleString()}
-                                <button class="btn btn-danger" style="margin-top: 10px; padding: 8px 16px;" onclick="completeWithdraw('${request.id}')">
-                                    ✅ Выполнено
-                                </button>
-                            </div>
-                        `;
-                    });
-                } else {
-                    html = '<div class="info-text">Нет активных заявок на вывод</div>';
-                }
-                document.getElementById('withdrawRequests').innerHTML = html;
-            } catch (error) {
-                console.error('Ошибка загрузки заявок:', error);
-                document.getElementById('withdrawRequests').innerHTML = '<div class="info-text">Ошибка подключения</div>';
+        // ВЫЛУПЛЕНИЕ ЯЙЦА И ПОЛУЧЕНИЕ ПРЕДМЕТОВ
+        async function hatchEgg() {
+            if (!playerData.current_egg) return;
+            
+            const eggType = playerData.egg_type;
+            let items = [];
+            
+            // ГЕНЕРАЦИЯ ПРЕДМЕТОВ В ЗАВИСИМОСТИ ОТ ТИПА ЯЙЦА
+            if (eggType === 'gold_egg') {
+                // ЗОЛОТАЯ УТКА: Шампанское 50%, Календарик 25%, Tama Gadget 20%, Evil Eye 10%, Love Potion 5%
+                const random = Math.random() * 100;
+                if (random <= 50) items.push({ name: "Шампанское", type: "gold_egg" });
+                else if (random <= 75) items.push({ name: "Календарик", type: "gold_egg" });
+                else if (random <= 95) items.push({ name: "Tama Gadget", type: "gold_egg" });
+                else if (random <= 105) items.push({ name: "Evil Eye", type: "gold_egg" });
+                else items.push({ name: "Love Potion", type: "gold_egg" });
+            } else {
+                // ОБЫЧНАЯ УТКА: Мишка 50%, Роза 25%, Календарик 25%
+                const random = Math.random() * 100;
+                if (random <= 50) items.push({ name: "Мишка", type: "normal_egg" });
+                else if (random <= 75) items.push({ name: "Роза", type: "normal_egg" });
+                else items.push({ name: "Календарик", type: "normal_egg" });
             }
+            
+            // ДОБАВЛЯЕМ ПРЕДМЕТЫ В ИНВЕНТАРЬ
+            playerData.items = playerData.items.concat(items);
+            
+            // СООБЩЕНИЕ О ВЫЛУПЛЕНИИ
+            let message = `🎉 Утка вылупилась! Получены предметы: `;
+            items.forEach(item => message += `${item.name}, `);
+            message = message.slice(0, -2); // Убираем последнюю запятую
+            
+            showNotification(message);
+            
+            // СБРАСЫВАЕМ ДАННЫЕ ЯЙЦА
+            playerData.current_egg = null;
+            playerData.egg_purchase_time = null;
+            playerData.egg_type = null;
+            playerData.is_alive = false;
+            
+            await savePlayerData();
+            updateUI();
         }
 
-        // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА - ИСПРАВЛЕННАЯ ВЕРСИЯ
+        // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА - ИСПРАВЛЕННАЯ ВЕРСИЯ С ТАЙМЕРОМ
         function updateUI() {
             document.getElementById('hungerValue').textContent = playerData.hunger + '/100';
             document.getElementById('moodValue').textContent = playerData.mood + '/100';
@@ -1188,7 +1190,7 @@
             const eggTypeDisplay = document.getElementById('eggTypeDisplay');
             const deathMessage = document.getElementById('deathMessage');
 
-            // ИСПРАВЛЕННАЯ ЛОГИКА ОТОБРАЖЕНИЯ
+            // ИСПРАВЛЕННАЯ ЛОГИКА ОТОБРАЖЕНИЯ С ТАЙМЕРОМ
             if (!playerData.current_egg) {
                 // Нет утки
                 duckImage.src = DUCK_IMAGES.none;
@@ -1204,19 +1206,40 @@
                 eggTypeDisplay.style.background = 'linear-gradient(135deg, #666, #333)';
                 deathMessage.style.display = 'block';
             } else {
-                // Утка жива
-                if (playerData.current_egg.type === 'gold_egg') {
-                    duckImage.src = DUCK_IMAGES.gold;
-                    duckImage.alt = "Золотая утка";
-                    eggTypeDisplay.textContent = 'Золотая утка';
-                    eggTypeDisplay.style.background = 'linear-gradient(135deg, var(--gold), var(--gold-dark))';
-                } else {
-                    duckImage.src = DUCK_IMAGES.normal;
-                    duckImage.alt = "Обычная утка";
-                    eggTypeDisplay.textContent = 'Обычная утка';
-                    eggTypeDisplay.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
+                // Утка жива - показываем таймер до вылупления
+                const purchaseTime = new Date(playerData.egg_purchase_time).getTime();
+                const currentTime = new Date().getTime();
+                const timePassed = currentTime - purchaseTime;
+                
+                let hatchTimeRequired = HATCH_TIME_NORMAL;
+                let duckType = "Обычная утка";
+                if (playerData.egg_type === 'gold_egg') {
+                    hatchTimeRequired = HATCH_TIME_GOLD;
+                    duckType = "Золотая утка";
                 }
-                deathMessage.style.display = 'none';
+                
+                const timeLeft = hatchTimeRequired - timePassed;
+                
+                if (timeLeft > 0) {
+                    // Показываем оставшееся время
+                    const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
+                    const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    
+                    duckImage.src = playerData.egg_type === 'gold_egg' ? DUCK_IMAGES.gold : DUCK_IMAGES.normal;
+                    duckImage.alt = duckType;
+                    eggTypeDisplay.textContent = `${duckType} (${hoursLeft}ч ${minutesLeft}м)`;
+                    eggTypeDisplay.style.background = playerData.egg_type === 'gold_egg' 
+                        ? 'linear-gradient(135deg, var(--gold), var(--gold-dark))' 
+                        : 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
+                    deathMessage.style.display = 'none';
+                } else {
+                    // Время вышло - утка должна вылупиться
+                    duckImage.src = DUCK_IMAGES.none;
+                    duckImage.alt = "Вылупление...";
+                    eggTypeDisplay.textContent = 'Вылупление...';
+                    eggTypeDisplay.style.background = 'linear-gradient(135deg, var(--accent), var(--accent-dark))';
+                    deathMessage.style.display = 'none';
+                }
             }
         }
 
@@ -1301,13 +1324,20 @@
                 playerData.food_count += 3;
                 showNotification('🎉 Вы купили 3 единицы еды!');
             } else {
-                // ИСПРАВЛЕННАЯ ПОКУПКА УТКИ
+                // ИСПРАВЛЕННАЯ ПОКУПКА УТКИ - СОХРАНЯЕМ ВРЕМЯ ПОКУПКИ И ТИП
                 playerData.current_egg = { type: itemType };
+                playerData.egg_purchase_time = new Date().toISOString(); // ЗАПОМИНАЕМ ВРЕМЯ ПОКУПКИ
+                playerData.egg_type = itemType; // СОХРАНЯЕМ ТИП ЯЙЦА
                 playerData.is_alive = true;
                 playerData.hunger = 100;
                 playerData.mood = 100;
                 playerData.last_stat_decrease = new Date().toISOString();
-                showNotification('🎉 Вы купили утку! Ухаживайте за ней.');
+                
+                // РАССЧИТЫВАЕМ ВРЕМЯ ВЫЛУПЛЕНИЯ
+                const hatchTime = itemType === 'gold_egg' ? HATCH_TIME_GOLD : HATCH_TIME_NORMAL;
+                const hatchDate = new Date(Date.now() + hatchTime);
+                
+                showNotification(`🎉 Вы купили утку! Она вылупится через ${itemType === 'gold_egg' ? '32' : '17'} часов (${hatchDate.toLocaleString()})`);
             }
             
             await savePlayerData();
@@ -1550,7 +1580,9 @@
                 current_egg: null,
                 food_count: 3,
                 is_alive: false,
-                last_stat_decrease: new Date().toISOString()
+                last_stat_decrease: new Date().toISOString(),
+                egg_purchase_time: null,
+                egg_type: null
             };
 
             const { error } = await supabase
@@ -1571,6 +1603,88 @@
             if (confirm('Сбросить весь прогресс?')) {
                 localStorage.clear();
                 location.reload();
+            }
+        }
+
+        // ЗАГРУЗКА ВСЕХ ИГРОКОВ (ДЛЯ АДМИНА)
+        async function loadAllPlayers() {
+            try {
+                const { data, error } = await supabase
+                    .from('players')
+                    .select('*')
+                    .order('stars', { ascending: false });
+
+                if (error) {
+                    console.error('Ошибка загрузки игроков:', error);
+                    document.getElementById('allPlayers').innerHTML = '<div class="info-text">Ошибка загрузки игроков</div>';
+                    return;
+                }
+
+                let html = '';
+                if (data && data.length > 0) {
+                    data.forEach((player, index) => {
+                        html += `
+                            <div class="player-list-item">
+                                <strong>#${index + 1}</strong><br>
+                                <strong>ID:</strong> ${player.user_id}<br>
+                                <strong>Звёзды:</strong> ${player.stars || 0}<br>
+                                <strong>Утка:</strong> ${player.current_egg ? 'Жива' : 'Нет'}<br>
+                                <strong>Предметы:</strong> ${player.items ? player.items.length : 0}
+                                <button class="btn btn-primary" style="margin-top: 10px; padding: 8px 16px;" onclick="adminAddStars('${player.user_id}', 10)">
+                                    +10 ⭐
+                                </button>
+                                <button class="btn btn-primary" style="margin-top: 10px; padding: 8px 16px;" onclick="adminAddStars('${player.user_id}', 50)">
+                                    +50 ⭐
+                                </button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html = '<div class="info-text">Нет игроков в базе</div>';
+                }
+                document.getElementById('allPlayers').innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки игроков:', error);
+                document.getElementById('allPlayers').innerHTML = '<div class="info-text">Ошибка подключения</div>';
+            }
+        }
+
+        // ЗАГРУЗКА ЗАЯВОК НА ВЫВОД
+        async function loadWithdrawRequests() {
+            try {
+                const { data, error } = await supabase
+                    .from('withdraw_requests')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    console.error('Ошибка загрузки заявок:', error);
+                    document.getElementById('withdrawRequests').innerHTML = '<div class="info-text">Ошибка загрузки заявок</div>';
+                    return;
+                }
+
+                let html = '';
+                if (data && data.length > 0) {
+                    data.forEach((request) => {
+                        html += `
+                            <div class="withdraw-request-item">
+                                <strong>Игрок:</strong> ${request.player_id}<br>
+                                <strong>Предмет:</strong> ${request.item_name}<br>
+                                <strong>Telegram:</strong> ${request.telegram}<br>
+                                <strong>Время:</strong> ${new Date(request.created_at).toLocaleString()}
+                                <button class="btn btn-danger" style="margin-top: 10px; padding: 8px 16px;" onclick="completeWithdraw('${request.id}')">
+                                    ✅ Выполнено
+                                </button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html = '<div class="info-text">Нет активных заявок на вывод</div>';
+                }
+                document.getElementById('withdrawRequests').innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки заявок:', error);
+                document.getElementById('withdrawRequests').innerHTML = '<div class="info-text">Ошибка подключения</div>';
             }
         }
 
