@@ -6,6 +6,7 @@
     <title>🥚 NFT Duck Eggs | Коллекционные утки</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* СТИЛИ ОСТАЮТСЯ ПРЕЖНИМИ */
         * {
             margin: 0;
             padding: 0;
@@ -834,6 +835,7 @@
                 
                 <div class="admin-header" style="margin-top: 25px;">📊 Заявки на вывод</div>
                 <div id="withdrawRequests">Загрузка...</div>
+                <button class="btn btn-primary" onclick="loadWithdrawRequests()">🔄 Обновить заявки</button>
             </div>
         </div>
     </div>
@@ -935,7 +937,7 @@
 
     <script>
         // КОНСТАНТЫ
-        const ADMIN_USER_ID = "USER_1761399526979_swpx4n20o";
+        const ADMIN_USER_ID = "USER_1761742453300_ekel72532"; // ВАШ НОВЫЙ ID
         const DUCK_IMAGES = {
             normal: "https://i.ibb.co/xtn9FC2N/normal-duck.png",
             gold: "https://i.ibb.co/B5czcMk3/gold-duck.png", 
@@ -1059,6 +1061,11 @@
 
             if (error) {
                 console.error('Ошибка загрузки:', error);
+                // Если игрок не найден, создаем нового
+                if (error.code === 'PGRST116') {
+                    await createNewPlayer();
+                    return;
+                }
                 showNotification('❌ Ошибка загрузки данных');
                 return;
             }
@@ -1103,19 +1110,25 @@
 
         // ЗАГРУЗКА ЗАЯВОК НА ВЫВОД ИЗ SUPABASE
         async function loadWithdrawRequests() {
-            const { data, error } = await supabase
-                .from('withdraw_requests')
-                .select('*')
-                .order('created_at', { ascending: false });
+            try {
+                const { data, error } = await supabase
+                    .from('withdraw_requests')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-            if (error) {
-                console.error('Ошибка загрузки заявок:', error);
-                showNotification('❌ Ошибка загрузки заявок');
-                return;
+                if (error) {
+                    console.error('Ошибка загрузки заявок:', error);
+                    showNotification('❌ Ошибка загрузки заявок');
+                    document.getElementById('withdrawRequests').innerHTML = '<div class="info-text">Ошибка загрузки заявок</div>';
+                    return;
+                }
+
+                withdrawRequests = data || [];
+                updateWithdrawRequestsDisplay();
+            } catch (error) {
+                console.error('Критическая ошибка загрузки заявок:', error);
+                document.getElementById('withdrawRequests').innerHTML = '<div class="info-text">Ошибка подключения к базе</div>';
             }
-
-            withdrawRequests = data || [];
-            updateWithdrawRequestsDisplay();
         }
 
         // ОБНОВЛЕНИЕ ОТОБРАЖЕНИЯ ЗАЯВОК
@@ -1462,7 +1475,43 @@
                 .single();
 
             if (error) {
-                showNotification('❌ Игрок с таким ID не найден!');
+                // Если игрок не найден, создаем его
+                if (error.code === 'PGRST116') {
+                    const newPlayerData = {
+                        id: targetPlayerId,
+                        hunger: 100,
+                        mood: 100,
+                        stars: stars,
+                        items: [],
+                        currentEgg: null,
+                        foodCount: 3,
+                        isAlive: false,
+                        lastStatDecrease: new Date().toISOString()
+                    };
+
+                    const { error: createError } = await supabase
+                        .from('players')
+                        .insert([newPlayerData]);
+
+                    if (createError) {
+                        showNotification('❌ Ошибка создания игрока!');
+                        return;
+                    }
+
+                    showNotification(`✅ Игрок ${targetPlayerId} создан и выдано ${stars} звёзд!`);
+                    
+                    // Если это текущий игрок, обновляем локальные данные
+                    if (targetPlayerId === playerData.id) {
+                        playerData.stars = stars;
+                        updateUI();
+                    }
+                    
+                    document.getElementById('adminPlayerId').value = '';
+                    document.getElementById('adminStars').value = '';
+                    return;
+                }
+                
+                showNotification('❌ Ошибка при поиске игрока!');
                 return;
             }
 
