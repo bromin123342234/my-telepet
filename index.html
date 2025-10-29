@@ -964,7 +964,7 @@
 
         let supabase;
         let playerData = {
-            id: '',
+            user_id: '', // ИСПРАВЛЕНО: было id, стало user_id
             hunger: 100,
             mood: 100,
             stars: 0,
@@ -1012,14 +1012,14 @@
                 localStorage.setItem('playerId', playerId);
             }
             
-            playerData.id = playerId;
-            document.getElementById('playerId').textContent = playerData.id;
+            playerData.user_id = playerId; // ИСПРАВЛЕНО: было id, стало user_id
+            document.getElementById('playerId').textContent = playerData.user_id;
             
             try {
                 const { data, error } = await supabase
                     .from('players')
                     .select('*')
-                    .eq('user_id', playerId)
+                    .eq('user_id', playerData.user_id) // ИСПРАВЛЕНО: ищем по user_id
                     .single();
 
                 if (error && error.code === 'PGRST116') {
@@ -1028,7 +1028,7 @@
                     console.error('Ошибка загрузки игрока:', error);
                     showNotification('❌ Ошибка загрузки данных');
                 } else if (data) {
-                    // ИСПРАВЛЕННАЯ ЗАГРУЗКА ДАННЫХ
+                    // ЗАГРУЗКА ДАННЫХ ИЗ БАЗЫ
                     playerData.hunger = data.hunger !== null ? data.hunger : 100;
                     playerData.mood = data.mood !== null ? data.mood : 100;
                     playerData.stars = data.stars !== null ? data.stars : 0;
@@ -1041,9 +1041,19 @@
                     playerData.egg_type = data.egg_type || null;
                     
                     console.log("✅ Данные загружены:", playerData);
+                    
+                    // ПРОВЕРЯЕМ, ЕСТЬ ЛИ УТКА И НЕ УМЕРЛА ЛИ ОНА
+                    if (playerData.current_egg) {
+                        if (playerData.hunger <= 0 || playerData.mood <= 0) {
+                            playerData.is_alive = false;
+                            showNotification('💀 Ваша утка умерла! Купите новую.');
+                        } else {
+                            playerData.is_alive = true;
+                        }
+                    }
                 }
                 
-                if (playerData.id === ADMIN_USER_ID) {
+                if (playerData.user_id === ADMIN_USER_ID) {
                     document.getElementById('adminToggle').style.display = 'block';
                     showNotification('👑 Добро пожаловать, Админ!');
                 }
@@ -1055,7 +1065,7 @@
         // СОЗДАНИЕ НОВОГО ИГРОКА В БАЗЕ
         async function createNewPlayer() {
             const newPlayer = {
-                user_id: playerData.id,
+                user_id: playerData.user_id, // ИСПРАВЛЕНО: было id, стало user_id
                 hunger: playerData.hunger,
                 mood: playerData.mood,
                 stars: playerData.stars,
@@ -1086,7 +1096,7 @@
                 const { error } = await supabase
                     .from('players')
                     .upsert([{
-                        user_id: playerData.id,
+                        user_id: playerData.user_id, // ИСПРАВЛЕНО: было id, стало user_id
                         hunger: playerData.hunger,
                         mood: playerData.mood,
                         stars: playerData.stars,
@@ -1175,7 +1185,7 @@
             updateUI();
         }
 
-        // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА - ИСПРАВЛЕННАЯ ВЕРСИЯ С ТАЙМЕРОМ
+        // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
         function updateUI() {
             document.getElementById('hungerValue').textContent = playerData.hunger + '/100';
             document.getElementById('moodValue').textContent = playerData.mood + '/100';
@@ -1190,7 +1200,6 @@
             const eggTypeDisplay = document.getElementById('eggTypeDisplay');
             const deathMessage = document.getElementById('deathMessage');
 
-            // ИСПРАВЛЕННАЯ ЛОГИКА ОТОБРАЖЕНИЯ С ТАЙМЕРОМ
             if (!playerData.current_egg) {
                 // Нет утки
                 duckImage.src = DUCK_IMAGES.none;
@@ -1250,6 +1259,7 @@
                 playerData.is_alive = false;
                 showNotification('💀 Утка умерла от голода или плохого настроения! Купите новую утку.');
                 updateUI();
+                savePlayerData();
             }
         }
 
@@ -1324,10 +1334,10 @@
                 playerData.food_count += 3;
                 showNotification('🎉 Вы купили 3 единицы еды!');
             } else {
-                // ИСПРАВЛЕННАЯ ПОКУПКА УТКИ - СОХРАНЯЕМ ВРЕМЯ ПОКУПКИ И ТИП
+                // ПОКУПКА УТКИ - СОХРАНЯЕМ ВРЕМЯ ПОКУПКИ И ТИП
                 playerData.current_egg = { type: itemType };
-                playerData.egg_purchase_time = new Date().toISOString(); // ЗАПОМИНАЕМ ВРЕМЯ ПОКУПКИ
-                playerData.egg_type = itemType; // СОХРАНЯЕМ ТИП ЯЙЦА
+                playerData.egg_purchase_time = new Date().toISOString();
+                playerData.egg_type = itemType;
                 playerData.is_alive = true;
                 playerData.hunger = 100;
                 playerData.mood = 100;
@@ -1409,7 +1419,7 @@
             const { error } = await supabase
                 .from('withdraw_requests')
                 .insert([{
-                    player_id: playerData.id,
+                    player_id: playerData.user_id, // ИСПРАВЛЕНО: было id, стало user_id
                     item_name: item.name,
                     telegram: telegram
                 }]);
@@ -1472,7 +1482,7 @@
             document.getElementById('referralModal').classList.remove('active');
         }
 
-        // АДМИН ПАНЕЛЬ - ПОЛНОСТЬЮ ПЕРЕПИСАННАЯ ВЕРСИЯ
+        // АДМИН ПАНЕЛЬ
         function toggleAdminPanel() {
             const panel = document.getElementById('adminPanel');
             panel.classList.toggle('active');
@@ -1486,29 +1496,26 @@
         async function findPlayer(playerId) {
             console.log("🔍 Поиск игрока:", playerId);
             
-            // Пробуем разные варианты поиска
-            const searchMethods = [
-                { field: 'user_id', value: playerId },
-                { field: 'id', value: playerId }
-            ];
+            if (!playerId) {
+                return { success: false, error: "Пустой ID игрока" };
+            }
             
-            for (const method of searchMethods) {
-                const { data, error } = await supabase
-                    .from('players')
-                    .select('*')
-                    .eq(method.field, method.value)
-                    .single();
-                
-                if (data && !error) {
-                    console.log(`✅ Игрок найден по полю ${method.field}`);
-                    return { success: true, data: data, field: method.field };
-                }
+            // Ищем только по user_id (основное поле)
+            const { data, error } = await supabase
+                .from('players')
+                .select('*')
+                .eq('user_id', playerId)
+                .single();
+            
+            if (data && !error) {
+                console.log(`✅ Игрок найден по user_id`);
+                return { success: true, data: data, field: 'user_id' };
             }
             
             return { success: false, error: "Игрок не найден" };
         }
 
-        // ИСПРАВЛЕННАЯ ФУНКЦИЯ ВЫДАЧИ ЗВЕЗД
+        // ФУНКЦИЯ ВЫДАЧИ ЗВЕЗД
         async function adminAddStars(playerId, stars) {
             try {
                 console.log("🔄 Попытка выдать звёзды игроку:", playerId);
@@ -1531,7 +1538,7 @@
                 const { error } = await supabase
                     .from('players')
                     .update({ stars: newStars })
-                    .eq(result.field, playerId);
+                    .eq('user_id', playerId); // ИСПРАВЛЕНО: ищем по user_id
 
                 if (error) {
                     console.error('❌ Ошибка обновления:', error);
@@ -1542,7 +1549,7 @@
                 showNotification(`✅ Выдано ${stars} звёзд игроку ${playerId}`);
                 
                 // Если это текущий игрок, обновляем локальные данные
-                if (playerId === playerData.id || player.user_id === playerData.id) {
+                if (playerId === playerData.user_id) {
                     playerData.stars = newStars;
                     updateUI();
                     showNotification(`🎉 Вы получили ${stars} звёзд!`);
@@ -1592,7 +1599,7 @@
             }
 
             const newPlayerData = {
-                user_id: newPlayerId,
+                user_id: newPlayerId, // ИСПРАВЛЕНО: было id, стало user_id
                 hunger: 100,
                 mood: 100,
                 stars: 0,
@@ -1644,8 +1651,8 @@
                 let html = '';
                 if (data && data.length > 0) {
                     data.forEach((player, index) => {
-                        // Используем user_id если есть, иначе id
-                        const playerId = player.user_id || player.id;
+                        // Используем user_id
+                        const playerId = player.user_id;
                         html += `
                             <div class="player-list-item">
                                 <strong>#${index + 1}</strong><br>
