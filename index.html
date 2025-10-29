@@ -1428,42 +1428,47 @@
             }
         }
 
-        // ВЫДАЧА ЗВЕЗД КОНКРЕТНОМУ ИГРОКУ
+        // ВЫДАЧА ЗВЕЗД КОНКРЕТНОМУ ИГРОКУ - ИСПРАВЛЕННАЯ ВЕРСИЯ
         async function adminAddStars(playerId, stars) {
             try {
+                console.log("🔄 Выдача звёзд игроку:", playerId);
+                
+                // Получаем текущие данные игрока
                 const { data, error } = await supabase
                     .from('players')
-                    .select('stars')
+                    .select('stars, user_id')
                     .eq('user_id', playerId)
                     .single();
 
                 if (error) {
+                    console.error('❌ Игрок не найден:', error);
                     showNotification('❌ Игрок не найден!');
                     return;
                 }
 
-                const newStars = (data.stars || 0) + stars;
+                // Вычисляем новые звёзды
+                const currentStars = data.stars || 0;
+                const newStars = currentStars + stars;
+                
+                // Обновляем в базе
                 const { error: updateError } = await supabase
                     .from('players')
                     .update({ stars: newStars })
                     .eq('user_id', playerId);
 
                 if (updateError) {
+                    console.error('❌ Ошибка обновления:', updateError);
                     showNotification('❌ Ошибка при выдаче звёзд!');
                     return;
                 }
 
                 showNotification(`✅ Выдано ${stars} звёзд игроку ${playerId}`);
                 
-                if (playerId === playerData.id) {
-                    playerData.stars = newStars;
-                    updateUI();
-                }
-                
-                loadAllPlayers();
+                // Обновляем список игроков
+                await loadAllPlayers();
                 
             } catch (error) {
-                console.error('Ошибка:', error);
+                console.error('❌ Ошибка:', error);
                 showNotification('❌ Произошла ошибка!');
             }
         }
