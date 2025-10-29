@@ -172,7 +172,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4em;
+            font-size: 80px;
+            line-height: 1;
         }
 
         .egg-type {
@@ -701,6 +702,7 @@
             .duck-frame {
                 width: 140px;
                 height: 140px;
+                font-size: 70px;
             }
         }
     </style>
@@ -1290,12 +1292,28 @@
             }
 
             if (targetPlayerId === playerData.id) {
+                // Выдача себе
                 playerData.stars += stars;
                 savePlayerData();
                 updateUI();
                 showNotification(`✅ Админ выдал вам ${stars} звёзд!`);
             } else {
-                showNotification(`✅ Выдано ${stars} звёзд игроку ${targetPlayerId}`);
+                // Выдача другому игроку
+                try {
+                    const targetPlayerData = localStorage.getItem('playerData_' + targetPlayerId);
+                    if (targetPlayerData) {
+                        const data = JSON.parse(targetPlayerData);
+                        data.stars += stars;
+                        localStorage.setItem('playerData_' + targetPlayerId, JSON.stringify(data));
+                        showNotification(`✅ Выдано ${stars} звёзд игроку ${targetPlayerId}`);
+                    } else {
+                        showNotification('❌ Игрок с таким ID не найден!');
+                        return;
+                    }
+                } catch (error) {
+                    showNotification('❌ Ошибка при выдаче звёзд игроку!');
+                    console.error(error);
+                }
             }
             
             document.getElementById('adminPlayerId').value = '';
