@@ -172,8 +172,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 80px;
-            line-height: 1;
+            overflow: hidden;
+        }
+
+        .duck-image {
+            width: 140px;
+            height: 140px;
+            object-fit: contain;
+            border-radius: 50%;
         }
 
         .egg-type {
@@ -702,7 +708,11 @@
             .duck-frame {
                 width: 140px;
                 height: 140px;
-                font-size: 70px;
+            }
+            
+            .duck-image {
+                width: 120px;
+                height: 120px;
             }
         }
     </style>
@@ -717,7 +727,7 @@
             <h1>🦆 NFT Ducks</h1>
             <div class="egg-display">
                 <div class="duck-frame" id="duckDisplay">
-                    ❌
+                    <img src="https://i.ibb.co/6W3s8y0/duck-default.png" alt="Нет утки" class="duck-image" id="duckImage">
                 </div>
                 <div class="egg-type" id="eggTypeDisplay">Нет утки</div>
                 <div id="deathMessage" class="death-message" style="display: none;">💀 Утка умерла! Купите новую</div>
@@ -913,6 +923,12 @@
     <script>
         // КОНСТАНТЫ
         const ADMIN_USER_ID = "USER_1761399526979_swpx4n20o";
+        const DUCK_IMAGES = {
+            normal: "https://i.ibb.co/xtn9FC2N/normal-duck.png",
+            gold: "https://i.ibb.co/B5czcMk3/gold-duck.png",
+            dead: "https://i.ibb.co/6W3s8y0/duck-default.png",
+            none: "https://i.ibb.co/6W3s8y0/duck-default.png"
+        };
 
         // ДАННЫЕ ИГРОКА
         let playerData = {
@@ -1042,32 +1058,32 @@
             document.getElementById('moodProgress').style.width = playerData.mood + '%';
 
             // Обновляем отображение утки
-            const duckDisplay = document.getElementById('duckDisplay');
+            const duckImage = document.getElementById('duckImage');
             const eggTypeDisplay = document.getElementById('eggTypeDisplay');
             const deathMessage = document.getElementById('deathMessage');
 
             if (!playerData.isAlive) {
-                duckDisplay.innerHTML = '💀';
-                duckDisplay.style.background = 'linear-gradient(135deg, #666, #333)';
+                duckImage.src = DUCK_IMAGES.dead;
+                duckImage.alt = "Утка умерла";
                 eggTypeDisplay.textContent = 'Утка умерла';
                 eggTypeDisplay.style.background = 'linear-gradient(135deg, #666, #333)';
                 deathMessage.style.display = 'block';
             } else if (playerData.currentEgg) {
                 if (playerData.currentEgg.type === 'gold_egg') {
-                    duckDisplay.innerHTML = '✨';
-                    duckDisplay.style.background = 'linear-gradient(135deg, var(--gold), var(--gold-dark))';
+                    duckImage.src = DUCK_IMAGES.gold;
+                    duckImage.alt = "Золотая утка";
                     eggTypeDisplay.textContent = 'Золотая утка';
                     eggTypeDisplay.style.background = 'linear-gradient(135deg, var(--gold), var(--gold-dark))';
                 } else {
-                    duckDisplay.innerHTML = '🦆';
-                    duckDisplay.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
+                    duckImage.src = DUCK_IMAGES.normal;
+                    duckImage.alt = "Обычная утка";
                     eggTypeDisplay.textContent = 'Обычная утка';
                     eggTypeDisplay.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
                 }
                 deathMessage.style.display = 'none';
             } else {
-                duckDisplay.innerHTML = '❌';
-                duckDisplay.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))';
+                duckImage.src = DUCK_IMAGES.none;
+                duckImage.alt = "Нет утки";
                 eggTypeDisplay.textContent = 'Нет утки';
                 eggTypeDisplay.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
                 deathMessage.style.display = 'none';
