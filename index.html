@@ -978,10 +978,15 @@
         async function initGame() {
             console.log("🎮 Игра запускается...");
             
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            await setupPlayerId();
-            updateUI();
-            showNotification('🎉 Добро пожаловать!');
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                await setupPlayerId();
+                updateUI();
+                showNotification('🎉 Добро пожаловать!');
+            } catch (error) {
+                console.error('Ошибка инициализации:', error);
+                showNotification('❌ Ошибка загрузки игры');
+            }
         }
 
         // НАСТРОЙКА ID ИГРОКА
@@ -996,31 +1001,35 @@
             playerData.id = playerId;
             document.getElementById('playerId').textContent = playerData.id;
             
-            const { data, error } = await supabase
-                .from('players')
-                .select('*')
-                .eq('user_id', playerId)
-                .single();
+            try {
+                const { data, error } = await supabase
+                    .from('players')
+                    .select('*')
+                    .eq('user_id', playerId)
+                    .single();
 
-            if (error && error.code === 'PGRST116') {
-                await createNewPlayer();
-            } else if (error) {
-                console.error('Ошибка загрузки игрока:', error);
-                showNotification('❌ Ошибка загрузки данных');
-            } else if (data) {
-                playerData.hunger = data.hunger || 100;
-                playerData.mood = data.mood || 100;
-                playerData.stars = data.stars || 0;
-                playerData.items = data.items || [];
-                playerData.current_egg = data.current_egg || null;
-                playerData.food_count = data.food_count || 3;
-                playerData.is_alive = data.is_alive || false;
-                playerData.last_stat_decrease = data.last_stat_decrease || new Date().toISOString();
-            }
-            
-            if (playerData.id === ADMIN_USER_ID) {
-                document.getElementById('adminToggle').style.display = 'block';
-                showNotification('👑 Добро пожаловать, Админ!');
+                if (error && error.code === 'PGRST116') {
+                    await createNewPlayer();
+                } else if (error) {
+                    console.error('Ошибка загрузки игрока:', error);
+                    showNotification('❌ Ошибка загрузки данных');
+                } else if (data) {
+                    playerData.hunger = data.hunger || 100;
+                    playerData.mood = data.mood || 100;
+                    playerData.stars = data.stars || 0;
+                    playerData.items = data.items || [];
+                    playerData.current_egg = data.current_egg || null;
+                    playerData.food_count = data.food_count || 3;
+                    playerData.is_alive = data.is_alive || false;
+                    playerData.last_stat_decrease = data.last_stat_decrease || new Date().toISOString();
+                }
+                
+                if (playerData.id === ADMIN_USER_ID) {
+                    document.getElementById('adminToggle').style.display = 'block';
+                    showNotification('👑 Добро пожаловать, Админ!');
+                }
+            } catch (error) {
+                console.error('Ошибка настройки игрока:', error);
             }
         }
 
@@ -1052,25 +1061,27 @@
 
         // СОХРАНЕНИЕ ДАННЫХ ИГРОКА В SUPABASE
         async function savePlayerData() {
-            const { error } = await supabase
-                .from('players')
-                .upsert([{
-                    user_id: playerData.id,
-                    hunger: playerData.hunger,
-                    mood: playerData.mood,
-                    stars: playerData.stars,
-                    items: playerData.items,
-                    current_egg: playerData.current_egg,
-                    food_count: playerData.food_count,
-                    is_alive: playerData.is_alive,
-                    last_stat_decrease: playerData.last_stat_decrease
-                }]);
+            try {
+                const { error } = await supabase
+                    .from('players')
+                    .upsert([{
+                        user_id: playerData.id,
+                        hunger: playerData.hunger,
+                        mood: playerData.mood,
+                        stars: playerData.stars,
+                        items: playerData.items,
+                        current_egg: playerData.current_egg,
+                        food_count: playerData.food_count,
+                        is_alive: playerData.is_alive,
+                        last_stat_decrease: playerData.last_stat_decrease
+                    }]);
 
-            if (error) {
-                console.error('❌ Ошибка сохранения:', error);
-                showNotification('❌ Ошибка сохранения данных');
-            } else {
-                console.log("💾 Данные сохранены в Supabase");
+                if (error) {
+                    console.error('❌ Ошибка сохранения:', error);
+                    showNotification('❌ Ошибка сохранения данных');
+                }
+            } catch (error) {
+                console.error('Ошибка сохранения:', error);
             }
         }
 
@@ -1112,12 +1123,12 @@
                 }
                 document.getElementById('allPlayers').innerHTML = html;
             } catch (error) {
-                console.error('Критическая ошибка загрузки игроков:', error);
-                document.getElementById('allPlayers').innerHTML = '<div class="info-text">Ошибка подключения к базе</div>';
+                console.error('Ошибка загрузки игроков:', error);
+                document.getElementById('allPlayers').innerHTML = '<div class="info-text">Ошибка подключения</div>';
             }
         }
 
-        // ЗАГРУЗКА ЗАЯВОК НА ВЫВОД ИЗ SUPABASE
+        // ЗАГРУЗКА ЗАЯВОК НА ВЫВОД
         async function loadWithdrawRequests() {
             try {
                 const { data, error } = await supabase
@@ -1127,7 +1138,6 @@
 
                 if (error) {
                     console.error('Ошибка загрузки заявок:', error);
-                    showNotification('❌ Ошибка загрузки заявок');
                     document.getElementById('withdrawRequests').innerHTML = '<div class="info-text">Ошибка загрузки заявок</div>';
                     return;
                 }
@@ -1152,8 +1162,8 @@
                 }
                 document.getElementById('withdrawRequests').innerHTML = html;
             } catch (error) {
-                console.error('Критическая ошибка загрузки заявок:', error);
-                document.getElementById('withdrawRequests').innerHTML = '<div class="info-text">Ошибка подключения к базе</div>';
+                console.error('Ошибка загрузки заявок:', error);
+                document.getElementById('withdrawRequests').innerHTML = '<div class="info-text">Ошибка подключения</div>';
             }
         }
 
@@ -1420,34 +1430,41 @@
 
         // ВЫДАЧА ЗВЕЗД КОНКРЕТНОМУ ИГРОКУ
         async function adminAddStars(playerId, stars) {
-            if (playerId === playerData.id) {
-                playerData.stars += stars;
-                await savePlayerData();
-                updateUI();
-                showNotification(`✅ Вам выдано ${stars} звёзд!`);
-            } else {
-                const { data } = await supabase
+            try {
+                const { data, error } = await supabase
                     .from('players')
                     .select('stars')
                     .eq('user_id', playerId)
                     .single();
 
-                if (data) {
-                    const newStars = (data.stars || 0) + stars;
-                    const { error } = await supabase
-                        .from('players')
-                        .update({ stars: newStars })
-                        .eq('user_id', playerId);
-
-                    if (error) {
-                        showNotification('❌ Ошибка при выдаче звёзд!');
-                    } else {
-                        showNotification(`✅ Выдано ${stars} звёзд игроку ${playerId}`);
-                        loadAllPlayers();
-                    }
-                } else {
+                if (error) {
                     showNotification('❌ Игрок не найден!');
+                    return;
                 }
+
+                const newStars = (data.stars || 0) + stars;
+                const { error: updateError } = await supabase
+                    .from('players')
+                    .update({ stars: newStars })
+                    .eq('user_id', playerId);
+
+                if (updateError) {
+                    showNotification('❌ Ошибка при выдаче звёзд!');
+                    return;
+                }
+
+                showNotification(`✅ Выдано ${stars} звёзд игроку ${playerId}`);
+                
+                if (playerId === playerData.id) {
+                    playerData.stars = newStars;
+                    updateUI();
+                }
+                
+                loadAllPlayers();
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showNotification('❌ Произошла ошибка!');
             }
         }
 
