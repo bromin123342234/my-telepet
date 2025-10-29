@@ -6,7 +6,6 @@
     <title>🥚 NFT Duck Eggs | Коллекционные утки</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* СТИЛИ ОСТАЮТСЯ ПРЕЖНИМИ */
         * {
             margin: 0;
             padding: 0;
@@ -1473,7 +1472,7 @@
             document.getElementById('referralModal').classList.remove('active');
         }
 
-        // АДМИН ПАНЕЛЬ - ИСПРАВЛЕННАЯ ВЕРСИЯ
+        // АДМИН ПАНЕЛЬ - ПОЛНОСТЬЮ ПЕРЕПИСАННАЯ ВЕРСИЯ
         function toggleAdminPanel() {
             const panel = document.getElementById('adminPanel');
             panel.classList.toggle('active');
@@ -1483,60 +1482,59 @@
             }
         }
 
+        // УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ДЛЯ ПОИСКА ИГРОКА
+        async function findPlayer(playerId) {
+            console.log("🔍 Поиск игрока:", playerId);
+            
+            // Пробуем разные варианты поиска
+            const searchMethods = [
+                { field: 'user_id', value: playerId },
+                { field: 'id', value: playerId }
+            ];
+            
+            for (const method of searchMethods) {
+                const { data, error } = await supabase
+                    .from('players')
+                    .select('*')
+                    .eq(method.field, method.value)
+                    .single();
+                
+                if (data && !error) {
+                    console.log(`✅ Игрок найден по полю ${method.field}`);
+                    return { success: true, data: data, field: method.field };
+                }
+            }
+            
+            return { success: false, error: "Игрок не найден" };
+        }
+
         // ИСПРАВЛЕННАЯ ФУНКЦИЯ ВЫДАЧИ ЗВЕЗД
         async function adminAddStars(playerId, stars) {
             try {
-                console.log("🔄 Выдача звёзд игроку:", playerId);
+                console.log("🔄 Попытка выдать звёзды игроку:", playerId);
                 
-                // Сначала попробуем найти игрока по user_id
-                let { data, error } = await supabase
-                    .from('players')
-                    .select('stars, user_id')
-                    .eq('user_id', playerId)
-                    .single();
-
-                // Если не нашли, попробуем найти по id (если в базе используется id вместо user_id)
-                if (error) {
-                    console.log("Пробуем найти по id...");
-                    const { data: dataById, error: errorById } = await supabase
-                        .from('players')
-                        .select('stars, user_id, id')
-                        .eq('id', playerId)
-                        .single();
-                    
-                    if (errorById) {
-                        console.error('❌ Игрок не найден:', errorById);
-                        showNotification('❌ Игрок не найден! Проверьте ID');
-                        return;
-                    }
-                    data = dataById;
+                // Ищем игрока
+                const result = await findPlayer(playerId);
+                
+                if (!result.success) {
+                    showNotification('❌ Игрок не найден! Проверьте ID');
+                    return;
                 }
 
-                // Вычисляем новые звёзды
-                const currentStars = data.stars || 0;
+                const player = result.data;
+                const currentStars = player.stars || 0;
                 const newStars = currentStars + stars;
                 
-                // Обновляем в базе по user_id (основной способ)
-                let updateError = null;
-                let updateResult = await supabase
+                console.log(`💰 Текущие звёзды: ${currentStars}, новые: ${newStars}`);
+                
+                // Обновляем данные игрока
+                const { error } = await supabase
                     .from('players')
                     .update({ stars: newStars })
-                    .eq('user_id', playerId);
+                    .eq(result.field, playerId);
 
-                updateError = updateResult.error;
-
-                // Если не получилось обновить по user_id, пробуем по id
-                if (updateError) {
-                    console.log("Пробуем обновить по id...");
-                    const updateResultById = await supabase
-                        .from('players')
-                        .update({ stars: newStars })
-                        .eq('id', playerId);
-                    updateError = updateResultById.error;
-                }
-
-                if (updateError) {
-                    console.error('❌ Ошибка обновления:', updateError);
+                if (error) {
+                    console.error('❌ Ошибка обновления:', error);
                     showNotification('❌ Ошибка при выдаче звёзд!');
                     return;
                 }
@@ -1544,9 +1542,10 @@
                 showNotification(`✅ Выдано ${stars} звёзд игроку ${playerId}`);
                 
                 // Если это текущий игрок, обновляем локальные данные
-                if (playerId === playerData.id) {
+                if (playerId === playerData.id || player.user_id === playerData.id) {
                     playerData.stars = newStars;
                     updateUI();
+                    showNotification(`🎉 Вы получили ${stars} звёзд!`);
                 }
                 
                 // Обновляем список игроков
@@ -1554,7 +1553,7 @@
                 
             } catch (error) {
                 console.error('❌ Ошибка:', error);
-                showNotification('❌ Произошла ошибка! Проверьте ID игрока');
+                showNotification('❌ Произошла ошибка!');
             }
         }
 
@@ -1585,13 +1584,9 @@
                 return;
             }
 
-            const { data } = await supabase
-                .from('players')
-                .select('user_id')
-                .eq('user_id', newPlayerId)
-                .single();
-
-            if (data) {
+            // Проверяем, существует ли уже игрок
+            const result = await findPlayer(newPlayerId);
+            if (result.success) {
                 showNotification('❌ Игрок с таким ID уже существует!');
                 return;
             }
@@ -1615,6 +1610,7 @@
                 .insert([newPlayerData]);
 
             if (error) {
+                console.error('Ошибка создания игрока:', error);
                 showNotification('❌ Ошибка создания игрока!');
                 return;
             }
@@ -1631,7 +1627,7 @@
             }
         }
 
-        // ЗАГРУЗКА ВСЕХ ИГРОКОВ (ДЛЯ АДМИНА) - ИСПРАВЛЕННАЯ ВЕРСИЯ
+        // ЗАГРУЗКА ВСЕХ ИГРОКОВ (ДЛЯ АДМИНА)
         async function loadAllPlayers() {
             try {
                 const { data, error } = await supabase
@@ -1648,7 +1644,7 @@
                 let html = '';
                 if (data && data.length > 0) {
                     data.forEach((player, index) => {
-                        // ИСПОЛЬЗУЕМ ПРАВИЛЬНОЕ ПОЛЕ ДЛЯ ID
+                        // Используем user_id если есть, иначе id
                         const playerId = player.user_id || player.id;
                         html += `
                             <div class="player-list-item">
