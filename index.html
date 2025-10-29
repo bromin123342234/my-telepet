@@ -6,6 +6,7 @@
     <title>🥚 NFT Duck Eggs | Коллекционные утки</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* СТИЛИ ОСТАЮТСЯ ПРЕЖНИМИ */
         * {
             margin: 0;
             padding: 0;
@@ -1472,7 +1473,7 @@
             document.getElementById('referralModal').classList.remove('active');
         }
 
-        // АДМИН ПАНЕЛЬ
+        // АДМИН ПАНЕЛЬ - ИСПРАВЛЕННАЯ ВЕРСИЯ
         function toggleAdminPanel() {
             const panel = document.getElementById('adminPanel');
             panel.classList.toggle('active');
@@ -1482,33 +1483,57 @@
             }
         }
 
-        // ВЫДАЧА ЗВЕЗД КОНКРЕТНОМУ ИГРОКУ - ИСПРАВЛЕННАЯ ВЕРСИЯ
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ ВЫДАЧИ ЗВЕЗД
         async function adminAddStars(playerId, stars) {
             try {
                 console.log("🔄 Выдача звёзд игроку:", playerId);
                 
-                // Получаем текущие данные игрока
-                const { data, error } = await supabase
+                // Сначала попробуем найти игрока по user_id
+                let { data, error } = await supabase
                     .from('players')
-                    .select('stars')
+                    .select('stars, user_id')
                     .eq('user_id', playerId)
                     .single();
 
+                // Если не нашли, попробуем найти по id (если в базе используется id вместо user_id)
                 if (error) {
-                    console.error('❌ Игрок не найден:', error);
-                    showNotification('❌ Игрок не найден!');
-                    return;
+                    console.log("Пробуем найти по id...");
+                    const { data: dataById, error: errorById } = await supabase
+                        .from('players')
+                        .select('stars, user_id, id')
+                        .eq('id', playerId)
+                        .single();
+                    
+                    if (errorById) {
+                        console.error('❌ Игрок не найден:', errorById);
+                        showNotification('❌ Игрок не найден! Проверьте ID');
+                        return;
+                    }
+                    data = dataById;
                 }
 
                 // Вычисляем новые звёзды
                 const currentStars = data.stars || 0;
                 const newStars = currentStars + stars;
                 
-                // Обновляем в базе
-                const { error: updateError } = await supabase
+                // Обновляем в базе по user_id (основной способ)
+                let updateError = null;
+                let updateResult = await supabase
                     .from('players')
                     .update({ stars: newStars })
                     .eq('user_id', playerId);
+
+                updateError = updateResult.error;
+
+                // Если не получилось обновить по user_id, пробуем по id
+                if (updateError) {
+                    console.log("Пробуем обновить по id...");
+                    const updateResultById = await supabase
+                        .from('players')
+                        .update({ stars: newStars })
+                        .eq('id', playerId);
+                    updateError = updateResultById.error;
+                }
 
                 if (updateError) {
                     console.error('❌ Ошибка обновления:', updateError);
@@ -1529,7 +1554,7 @@
                 
             } catch (error) {
                 console.error('❌ Ошибка:', error);
-                showNotification('❌ Произошла ошибка!');
+                showNotification('❌ Произошла ошибка! Проверьте ID игрока');
             }
         }
 
@@ -1606,7 +1631,7 @@
             }
         }
 
-        // ЗАГРУЗКА ВСЕХ ИГРОКОВ (ДЛЯ АДМИНА)
+        // ЗАГРУЗКА ВСЕХ ИГРОКОВ (ДЛЯ АДМИНА) - ИСПРАВЛЕННАЯ ВЕРСИЯ
         async function loadAllPlayers() {
             try {
                 const { data, error } = await supabase
@@ -1623,17 +1648,19 @@
                 let html = '';
                 if (data && data.length > 0) {
                     data.forEach((player, index) => {
+                        // ИСПОЛЬЗУЕМ ПРАВИЛЬНОЕ ПОЛЕ ДЛЯ ID
+                        const playerId = player.user_id || player.id;
                         html += `
                             <div class="player-list-item">
                                 <strong>#${index + 1}</strong><br>
-                                <strong>ID:</strong> ${player.user_id}<br>
+                                <strong>ID:</strong> ${playerId}<br>
                                 <strong>Звёзды:</strong> ${player.stars || 0}<br>
                                 <strong>Утка:</strong> ${player.current_egg ? 'Жива' : 'Нет'}<br>
                                 <strong>Предметы:</strong> ${player.items ? player.items.length : 0}
-                                <button class="btn btn-primary" style="margin-top: 10px; padding: 8px 16px;" onclick="adminAddStars('${player.user_id}', 10)">
+                                <button class="btn btn-primary" style="margin-top: 10px; padding: 8px 16px;" onclick="adminAddStars('${playerId}', 10)">
                                     +10 ⭐
                                 </button>
-                                <button class="btn btn-primary" style="margin-top: 10px; padding: 8px 16px;" onclick="adminAddStars('${player.user_id}', 50)">
+                                <button class="btn btn-primary" style="margin-top: 10px; padding: 8px 16px;" onclick="adminAddStars('${playerId}', 50)">
                                     +50 ⭐
                                 </button>
                             </div>
