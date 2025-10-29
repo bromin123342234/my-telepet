@@ -685,6 +685,14 @@
             transform: translateX(0);
         }
 
+        .withdraw-request-item {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+            padding: 15px;
+            border-radius: 15px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
         @media (max-width: 480px) {
             .game-container {
                 padding: 25px 20px;
@@ -817,6 +825,11 @@
                 <input type="number" class="admin-input" placeholder="Количество звёзд" id="adminStars">
                 
                 <button class="btn btn-admin" onclick="adminGiveStars()">✅ Выдать звёзды</button>
+                
+                <div class="admin-header" style="margin-top: 25px;">🎯 Создать игрока</div>
+                <input type="text" class="admin-input" placeholder="ID нового игрока" id="newPlayerId">
+                <button class="btn btn-primary" onclick="adminCreatePlayer()">➕ Создать игрока</button>
+                
                 <button class="btn btn-danger" onclick="adminReset()">🔄 Сбросить прогресс</button>
                 
                 <div class="admin-header" style="margin-top: 25px;">📊 Заявки на вывод</div>
@@ -946,6 +959,9 @@
         let currentPurchase = null;
         let currentWithdrawItem = null;
 
+        // СИСТЕМА ВЫВОДА
+        let withdrawRequests = JSON.parse(localStorage.getItem('withdrawRequests') || '[]');
+
         // ИНИЦИАЛИЗАЦИЯ ИГРЫ
         function initGame() {
             console.log("🎮 Игра запускается...");
@@ -958,6 +974,9 @@
             
             // Обновляем интерфейс
             updateUI();
+            
+            // Загружаем заявки на вывод
+            loadWithdrawRequests();
             
             // Запускаем систему уменьшения показателей
             startStatDecrease();
@@ -1022,6 +1041,38 @@
             console.log("💾 Данные сохранены:", playerData);
         }
 
+        // ЗАГРУЗКА ЗАЯВОК НА ВЫВОД
+        function loadWithdrawRequests() {
+            withdrawRequests = JSON.parse(localStorage.getItem('withdrawRequests') || '[]');
+            updateWithdrawRequestsDisplay();
+        }
+
+        // ОБНОВЛЕНИЕ ОТОБРАЖЕНИЯ ЗАЯВОК
+        function updateWithdrawRequestsDisplay() {
+            const requestsContainer = document.getElementById('withdrawRequests');
+            
+            if (withdrawRequests.length === 0) {
+                requestsContainer.innerHTML = '<div class="info-text">Нет активных заявок на вывод</div>';
+                return;
+            }
+
+            let html = '';
+            withdrawRequests.forEach((request, index) => {
+                html += `
+                    <div class="withdraw-request-item">
+                        <strong>Игрок:</strong> ${request.playerId}<br>
+                        <strong>Предмет:</strong> ${request.itemName}<br>
+                        <strong>Telegram:</strong> ${request.telegram}<br>
+                        <strong>Время:</strong> ${new Date(request.timestamp).toLocaleString()}
+                        <button class="btn btn-danger" style="margin-top: 10px; padding: 8px 16px;" onclick="completeWithdraw(${index})">
+                            ✅ Выполнено
+                        </button>
+                    </div>
+                `;
+            });
+            requestsContainer.innerHTML = html;
+        }
+
         // СИСТЕМА УМЕНЬШЕНИЯ ПОКАЗАТЕЛЕЙ
         function startStatDecrease() {
             setInterval(() => {
@@ -1031,7 +1082,6 @@
                 const minutesPassed = (now - playerData.lastStatDecrease) / (1000 * 60);
                 
                 if (minutesPassed >= 1) {
-                    // Уменьшаем показатели: 1 единица голода и 2 единицы настроения в минуту
                     playerData.hunger = Math.max(0, playerData.hunger - 1);
                     playerData.mood = Math.max(0, playerData.mood - 2);
                     playerData.lastStatDecrease = now;
@@ -1040,24 +1090,20 @@
                     updateUI();
                     checkDeath();
                 }
-            }, 60000); // Проверка каждую минуту
+            }, 60000);
         }
 
         // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
         function updateUI() {
-            console.log("🔄 Обновление интерфейса:", playerData);
-            
             document.getElementById('hungerValue').textContent = playerData.hunger + '/100';
             document.getElementById('moodValue').textContent = playerData.mood + '/100';
             document.getElementById('starsValue').textContent = playerData.stars;
             document.getElementById('itemsValue').textContent = playerData.items.length;
             document.getElementById('foodCount').textContent = '🍎 Еды: ' + playerData.foodCount;
 
-            // Обновляем прогресс-бары
             document.getElementById('hungerProgress').style.width = playerData.hunger + '%';
             document.getElementById('moodProgress').style.width = playerData.mood + '%';
 
-            // Обновляем отображение утки
             const duckImage = document.getElementById('duckImage');
             const eggTypeDisplay = document.getElementById('eggTypeDisplay');
             const deathMessage = document.getElementById('deathMessage');
@@ -1092,7 +1138,6 @@
 
         // УХОД ЗА УТКОЙ
         function feedDuck() {
-            console.log("🍎 Кормление утки...");
             if (!playerData.isAlive) {
                 showNotification('❌ Утка умерла! Купите новую утку.');
                 return;
@@ -1110,7 +1155,6 @@
         }
 
         function playWithDuck() {
-            console.log("🎮 Игра с уткой...");
             if (!playerData.isAlive) {
                 showNotification('❌ Утка умерла! Купите новую утку.');
                 return;
@@ -1133,7 +1177,6 @@
 
         // МАГАЗИН
         function openShop() {
-            console.log("🛒 Открываем магазин...");
             document.getElementById('shopModal').classList.add('active');
         }
 
@@ -1142,7 +1185,6 @@
         }
 
         function buyItem(itemType, cost) {
-            console.log("💰 Покупаем:", itemType, "за", cost, "звёзд");
             currentPurchase = { itemType, cost };
             const itemNames = {
                 'gold_egg': 'Золотую утку',
@@ -1162,7 +1204,6 @@
             
             const { itemType, cost } = currentPurchase;
             
-            // ПРОВЕРКА БАЛАНСА
             if (playerData.stars < cost) {
                 showNotification('❌ Недостаточно звёзд!');
                 closeConfirm();
@@ -1175,7 +1216,6 @@
                 playerData.foodCount += 3;
                 showNotification('🎉 Вы купили 3 единицы еды!');
             } else {
-                // Покупаем утку
                 playerData.currentEgg = { type: itemType };
                 playerData.isAlive = true;
                 playerData.hunger = 100;
@@ -1191,7 +1231,6 @@
 
         // ИНВЕНТАРЬ И ВЫВОД
         function openInventory() {
-            console.log("🎒 Открываем инвентарь...");
             const inventoryItems = document.getElementById('inventoryItems');
             
             if (playerData.items.length === 0) {
@@ -1250,18 +1289,36 @@
 
             const item = playerData.items[currentWithdrawItem];
             
+            // Создаем заявку на вывод
+            const withdrawRequest = {
+                playerId: playerData.id,
+                itemName: item.name,
+                telegram: telegram,
+                timestamp: Date.now()
+            };
+            
+            withdrawRequests.push(withdrawRequest);
+            localStorage.setItem('withdrawRequests', JSON.stringify(withdrawRequests));
+            
             // Удаляем предмет из инвентаря
             playerData.items.splice(currentWithdrawItem, 1);
             savePlayerData();
             updateUI();
+            
             closeWithdraw();
             closeInventory();
             showNotification('✅ Заявка на вывод отправлена! С вами свяжутся в Telegram.');
         }
 
+        function completeWithdraw(requestIndex) {
+            withdrawRequests.splice(requestIndex, 1);
+            localStorage.setItem('withdrawRequests', JSON.stringify(withdrawRequests));
+            updateWithdrawRequestsDisplay();
+            showNotification('✅ Заявка на вывод выполнена!');
+        }
+
         // ЗАДАНИЯ
         function openQuests() {
-            console.log("🎯 Открываем задания...");
             document.getElementById('questsModal').classList.add('active');
         }
 
@@ -1279,7 +1336,6 @@
 
         // РЕФЕРАЛЬНАЯ СИСТЕМА
         function openReferral() {
-            console.log("👥 Открываем реф систему...");
             document.getElementById('referralModal').classList.add('active');
         }
 
@@ -1291,6 +1347,9 @@
         function toggleAdminPanel() {
             const panel = document.getElementById('adminPanel');
             panel.classList.toggle('active');
+            if (panel.classList.contains('active')) {
+                loadWithdrawRequests();
+            }
         }
 
         function adminGiveStars() {
@@ -1310,7 +1369,7 @@
             // Проверяем существование игрока
             const targetData = localStorage.getItem('playerData_' + targetPlayerId);
             if (!targetData) {
-                showNotification('❌ Игрок с таким ID не найден!');
+                showNotification('❌ Игрок с таким ID не найден! Создайте игрока сначала.');
                 return;
             }
 
@@ -1321,7 +1380,6 @@
                 
                 showNotification(`✅ Выдано ${stars} звёзд игроку ${targetPlayerId}`);
                 
-                // Если выдали себе, обновляем интерфейс
                 if (targetPlayerId === playerData.id) {
                     playerData.stars += stars;
                     updateUI();
@@ -1334,6 +1392,38 @@
             
             document.getElementById('adminPlayerId').value = '';
             document.getElementById('adminStars').value = '';
+        }
+
+        function adminCreatePlayer() {
+            const newPlayerId = document.getElementById('newPlayerId').value.trim();
+            
+            if (!newPlayerId) {
+                showNotification('❌ Введите ID нового игрока!');
+                return;
+            }
+
+            // Проверяем, не существует ли уже игрок
+            if (localStorage.getItem('playerData_' + newPlayerId)) {
+                showNotification('❌ Игрок с таким ID уже существует!');
+                return;
+            }
+
+            // Создаем нового игрока
+            const newPlayerData = {
+                id: newPlayerId,
+                hunger: 100,
+                mood: 100,
+                stars: 0,
+                items: [],
+                currentEgg: null,
+                foodCount: 3,
+                isAlive: false,
+                lastStatDecrease: Date.now()
+            };
+
+            localStorage.setItem('playerData_' + newPlayerId, JSON.stringify(newPlayerData));
+            showNotification(`✅ Игрок ${newPlayerId} создан!`);
+            document.getElementById('newPlayerId').value = '';
         }
 
         function adminReset() {
