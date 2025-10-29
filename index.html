@@ -925,7 +925,7 @@
         const ADMIN_USER_ID = "USER_1761399526979_swpx4n20o";
         const DUCK_IMAGES = {
             normal: "https://i.ibb.co/xtn9FC2N/normal-duck.png",
-            gold: "https://i.ibb.co/B5czcMk3/gold-duck.png",
+            gold: "https://i.ibb.co/B5czcMk3/gold-duck.png", 
             dead: "https://i.ibb.co/6W3s8y0/duck-default.png",
             none: "https://i.ibb.co/6W3s8y0/duck-default.png"
         };
@@ -1307,29 +1307,29 @@
                 return;
             }
 
-            if (targetPlayerId === playerData.id) {
-                // Выдача себе
-                playerData.stars += stars;
-                savePlayerData();
-                updateUI();
-                showNotification(`✅ Админ выдал вам ${stars} звёзд!`);
-            } else {
-                // Выдача другому игроку
-                try {
-                    const targetPlayerData = localStorage.getItem('playerData_' + targetPlayerId);
-                    if (targetPlayerData) {
-                        const data = JSON.parse(targetPlayerData);
-                        data.stars += stars;
-                        localStorage.setItem('playerData_' + targetPlayerId, JSON.stringify(data));
-                        showNotification(`✅ Выдано ${stars} звёзд игроку ${targetPlayerId}`);
-                    } else {
-                        showNotification('❌ Игрок с таким ID не найден!');
-                        return;
-                    }
-                } catch (error) {
-                    showNotification('❌ Ошибка при выдаче звёзд игроку!');
-                    console.error(error);
+            // Проверяем существование игрока
+            const targetData = localStorage.getItem('playerData_' + targetPlayerId);
+            if (!targetData) {
+                showNotification('❌ Игрок с таким ID не найден!');
+                return;
+            }
+
+            try {
+                const targetPlayerData = JSON.parse(targetData);
+                targetPlayerData.stars += stars;
+                localStorage.setItem('playerData_' + targetPlayerId, JSON.stringify(targetPlayerData));
+                
+                showNotification(`✅ Выдано ${stars} звёзд игроку ${targetPlayerId}`);
+                
+                // Если выдали себе, обновляем интерфейс
+                if (targetPlayerId === playerData.id) {
+                    playerData.stars += stars;
+                    updateUI();
                 }
+                
+            } catch (error) {
+                showNotification('❌ Ошибка при выдаче звёзд!');
+                console.error(error);
             }
             
             document.getElementById('adminPlayerId').value = '';
